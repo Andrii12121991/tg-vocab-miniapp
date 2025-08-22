@@ -90,6 +90,21 @@ button{
 .review-row .foreign{
   justify-self:start;
   opacity:0.0;
-  border-bottom
+  border-bottom:none;
+  font-size:18px;
+  font-weight:700;          /* английские жирные */
+}
+.review-row.revealed .foreign{opacity:1}
 
+.review-row .native{
+  font-weight:400;          /* русские обычные */
+  text-align:left;
+  justify-self:start;
+  font-size:18px;
+}
 
+/* Поиск */
+.list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
+
+/* Футер */
+footer{margin-top:16px;color:var(--muted)}
