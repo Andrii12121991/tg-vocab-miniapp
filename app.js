@@ -58,6 +58,7 @@
   }
 
   // -------- Review mode --------
+  // Справа — native (русское, видно). Слева — foreign (иностранное, скрыто до клика).
   function renderReview(order = entries){
     reviewListEl.innerHTML = '';
     order.forEach(e => {
@@ -65,14 +66,14 @@
       li.className = 'review-row';
       li.dataset.id = e.id;
       li.innerHTML = `
-        <span class="native">${escapeHtml(e.n)}</span>
         <span class="foreign">${escapeHtml(e.f)}</span>
+        <span class="native">${escapeHtml(e.n)}</span>
       `;
-      // показать/скрыть оригинал по клику на перевод
+      // клик по русскому (справа) — показать/скрыть иностранное (слева)
       li.querySelector('.native').addEventListener('click', () => {
         li.classList.toggle('revealed');
       });
-      // двойной клик по оригиналу — отметить как выученное (оставим для себя)
+      // двойной клик по иностранному (слева) — пометить как выучено
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
@@ -159,4 +160,5 @@
   // Initial paint
   renderList();
 })();
+
 
