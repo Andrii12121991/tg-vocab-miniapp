@@ -68,8 +68,10 @@ button{
 }
 .item span{
   padding:4px 6px;border-radius:6px;
-  font-size:18px;            /* ↑ читаемость в списке */
+  font-size:18px;
 }
+.item .foreign{font-weight:700}   /* английские жирные */
+.item .native{font-weight:400}    /* русские обычные */
 
 /* Кнопка-иконка удаления */
 .item .del{
@@ -79,33 +81,15 @@ button{
 }
 .item .del:hover{color:var(--danger)}
 
-/* Режим Проверка: справа — русское; слева — иностранное (показывается по клику) */
+/* Режим Проверка */
 .review-row{
   display:grid;grid-template-columns:1fr 1fr;
   gap:8px;align-items:center;
   padding:10px 0;border-bottom:1px dashed var(--border)
 }
-
-/* иностранное (слева) — скрыто до клика; БЕЗ подчёркивания */
 .review-row .foreign{
   justify-self:start;
   opacity:0.0;
-  border-bottom:none;        /* ← убрали пунктирное подчёркивание */
-  font-size:18px;            /* ↑ чуть крупнее */
-}
-.review-row.revealed .foreign{opacity:1}
+  border-bottom
 
-/* русское (справа) — видно, по левому краю */
-.review-row .native{
-  font-weight:700;
-  text-align:left;
-  justify-self:start;
-  font-size:18px;            /* ↑ чуть крупнее */
-}
-
-/* Поиск */
-.list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
-
-/* Футер */
-footer{margin-top:16px;color:var(--muted)}
 
