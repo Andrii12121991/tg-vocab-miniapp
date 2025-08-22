@@ -31,7 +31,7 @@ h1{font-size:22px;margin:0}
 }
 .mode-switch button.active{border-color:var(--accent)}
 
-/* Карточки-разделы */
+/* Карточки */
 .card{
   background:var(--card);border:1px solid var(--border);
   border-radius:16px;padding:16px
@@ -47,27 +47,22 @@ input[type="text"]{
   border:1px solid var(--border);
   background:#ffffff;
   color:#000000;
-  font-size:18px;             /* 🔹 увеличенный шрифт */
+  font-size:18px;             /* крупнее шрифт в инпутах */
   line-height:1.4;
 }
 .small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .actions{margin-top:8px}
 button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
 
-/* Список слов — компактная версия */
+/* Список слов — компактно */
 .list{list-style:none;padding:0;margin:12px 0 0 0}
-
-/* более компактные строки */
 .item{
   display:grid;grid-template-columns:1fr 1fr auto;
   gap:6px;align-items:center;
   border-bottom:1px dashed var(--border);
   padding:6px 0;
 }
-.item span{
-  padding:4px 6px;      
-  border-radius:6px;    
-}
+.item span{padding:4px 6px;border-radius:6px}
 
 /* Кнопка-иконка удаления (крестик) */
 .item .del{
@@ -76,19 +71,32 @@ button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;bord
 }
 .item .del:hover{color:var(--danger)}
 
-/* Режим проверки */
+/* Режим проверки: справа — русское, слева — иностранное (скрыто до клика) */
 .review-row{
   display:grid;grid-template-columns:1fr 1fr;
   gap:8px;align-items:center;
   padding:10px 0;border-bottom:1px dashed var(--border)
 }
-.review-row .native{font-weight:700}
-.review-row .foreign{justify-self:start;opacity:0.0;border-bottom:1px dotted var(--border)}
+
+/* иностранное (слева) — скрыто до клика */
+.review-row .foreign{
+  justify-self:start;
+  opacity:0.0;
+  border-bottom:1px dotted var(--border);
+}
 .review-row.revealed .foreign{opacity:1}
+
+/* русское (справа) — видно, выравниваем вправо */
+.review-row .native{
+  font-weight:700;
+  text-align:right;
+  justify-self:end;
+}
 
 /* Панель поиска */
 .list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
 
 /* Футер */
 footer{margin-top:16px;color:var(--muted)}
+
 
