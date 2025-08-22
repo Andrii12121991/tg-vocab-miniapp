@@ -19,7 +19,13 @@ h1{font-size:22px;margin:0}
 .hidden{display:none}
 .row{display:flex;gap:12px;flex-wrap:wrap}
 label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
-input[type="text"]{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#121316;color:var(--text)}
+input[type="text"] {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;   /* Белый фон */
+  color: #000000;        /* Чёрный текст */
+}
 .small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .actions{margin-top:8px}
 button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
