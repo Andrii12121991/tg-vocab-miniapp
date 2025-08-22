@@ -16,7 +16,12 @@ body{
   color:var(--text);
   font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial
 }
-#app{max-width:860px;margin:0 auto;padding:24px}
+/* шире контейнер и меньше боковые отступы */
+#app{
+  max-width: 960px;     /* было 860px */
+  margin: 0 auto;
+  padding: 16px;        /* было 24px */
+}
 
 /* Хедер и переключатель */
 header{
@@ -34,7 +39,8 @@ h1{font-size:22px;margin:0}
 /* Карточки */
 .card{
   background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:16px
+  border-radius:16px;
+  padding: 12px;        /* было 16px */
 }
 .hidden{display:none}
 .row{display:flex;gap:12px;flex-wrap:wrap}
@@ -47,7 +53,7 @@ input[type="text"]{
   border:1px solid var(--border);
   background:#ffffff;
   color:#000000;
-  font-size:18px;            /* крупнее текст в инпутах */
+  font-size:18px;
   line-height:1.4;
   -webkit-appearance:none;appearance:none;
 }
@@ -58,17 +64,19 @@ button{
   padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
 }
 
-/* Общие правила для списков (оба ul имеют class="list") */
+/* Общие правила для списков */
 .list{
-  list-style:none;           /* ← убираем точки */
+  list-style:none;
   padding:0;
   margin:12px 0 0 0
 }
 
-/* Режим Добавление: строка со словами */
+/* Режим Добавление — шире колонки и меньше зазоры */
 .item{
-  display:grid;grid-template-columns:1fr 1fr auto;
-  gap:6px;align-items:center;
+  display:grid;
+  grid-template-columns: 1.2fr 1.2fr auto; /* было 1fr 1fr auto */
+  gap:4px;                                  /* было 6px */
+  align-items:center;
   border-bottom:1px dashed var(--border);
   padding:6px 0;
 }
@@ -76,11 +84,11 @@ button{
   padding:4px 6px;border-radius:6px;
   font-size:18px;
 }
-/* Левое слово жирным, правое обычным — без привязки к языку */
+/* Левое слово жирным, правое обычным */
 .item span:first-child{ font-weight:700; }
 .item span:nth-child(2){ font-weight:400; }
 
-/* Крестик удаления — компактный, серый, без синего фона */
+/* Крестик удаления — компактный и нейтральный */
 .item .del{
   background:transparent !important;
   color:var(--muted);
@@ -92,14 +100,15 @@ button{
 }
 .item .del:hover{color:var(--danger)}
 
-/* Режим Проверка:
-   слева — foreign (скрыт до клика), справа — native (виден) */
+/* Режим Проверка — тоже шире колонки */
 .review-row{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:8px;align-items:center;
+  display:grid;
+  grid-template-columns: 1.2fr 1.2fr; /* было 1fr 1fr */
+  gap:8px;
+  align-items:center;
   padding:10px 0;border-bottom:1px dashed var(--border)
 }
-/* левый столбец (foreign) — скрыт до клика, жирный, БЕЗ подчёркивания */
+/* левый столбец (foreign) — скрыт до клика, жирный */
 .review-row .foreign{
   justify-self:start;
   opacity:0.0;
@@ -108,7 +117,6 @@ button{
   font-weight:700;
 }
 .review-row.revealed .foreign{opacity:1}
-
 /* правый столбец (native) — обычный, по левому краю */
 .review-row .native{
   font-weight:400;
@@ -122,3 +130,12 @@ button{
 
 /* Футер */
 footer{margin-top:16px;color:var(--muted)}
+
+/* Небольшой тюнинг для очень узких экранов (старые iPhone SE и т.п.) */
+@media (max-width: 360px){
+  #app{ padding:12px; }
+  .card{ padding:10px; }
+  .item{ grid-template-columns: 1.1fr 1.1fr auto; }
+  .review-row{ grid-template-columns: 1.1fr 1.1fr; }
+}
+
