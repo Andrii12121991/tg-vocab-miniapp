@@ -42,8 +42,13 @@ h1{font-size:22px;margin:0}
 /* Формы */
 label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
 input[type="text"]{
-  padding:10px 12px;border-radius:10px;border:1px solid var(--border);
-  background:#ffffff;color:#000000
+  padding:12px 14px;          /* увеличенные отступы */
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#ffffff;
+  color:#000000;
+  font-size:18px;             /* 🔹 увеличенный шрифт */
+  line-height:1.4;
 }
 .small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .actions{margin-top:8px}
@@ -52,7 +57,7 @@ button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;bord
 /* Список слов — компактная версия */
 .list{list-style:none;padding:0;margin:12px 0 0 0}
 
-/* было: gap 8px, padding 10px 0 — стало меньше, чтобы влезало больше строк */
+/* более компактные строки */
 .item{
   display:grid;grid-template-columns:1fr 1fr auto;
   gap:6px;align-items:center;
@@ -60,8 +65,8 @@ button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;bord
   padding:6px 0;
 }
 .item span{
-  padding:4px 6px;      /* было 6px 8px */
-  border-radius:6px;    /* было 8px */
+  padding:4px 6px;      
+  border-radius:6px;    
 }
 
 /* Кнопка-иконка удаления (крестик) */
@@ -70,12 +75,6 @@ button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;bord
   font-size:18px;line-height:1;cursor:pointer;padding:4px 6px
 }
 .item .del:hover{color:var(--danger)}
-
-/* Бейджи (если решишь вернуть) */
-.badge{
-  display:inline-block;font-size:12px;border:1px solid var(--border);
-  padding:2px 6px;border-radius:999px;color:var(--muted)
-}
 
 /* Режим проверки */
 .review-row{
@@ -92,3 +91,4 @@ button{border:none;background:var(--accent);color:#0a0a0a;padding:10px 14px;bord
 
 /* Футер */
 footer{margin-top:16px;color:var(--muted)}
+
