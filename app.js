@@ -11,6 +11,7 @@
     tg.BackButton.onClick(() => setMode('add'));
   }
 
+  // Elements
   const modeAddBtn = document.getElementById('mode-add');
   const modeReviewBtn = document.getElementById('mode-review');
   const addSection = document.getElementById('add-section');
@@ -21,15 +22,12 @@
   const nativeInput = document.getElementById('native');
   const listEl = document.getElementById('list');
   const searchEl = document.getElementById('search');
-  const clearAllBtn = document.getElementById('clear-all');
-  const exportBtn = document.getElementById('export-json');
-  const importBtn = document.getElementById('import-json');
-  const importFile = document.getElementById('import-file');
 
   const reviewListEl = document.getElementById('review-list');
   const shuffleBtn = document.getElementById('shuffle');
   const hideKnownEl = document.getElementById('hide-known');
 
+  // State
   const STORAGE_KEY = 'tg_vocab_entries_v1';
   const KNOWN_KEY = 'tg_vocab_known_v1';
   let entries = readJson(STORAGE_KEY, []);
@@ -42,6 +40,7 @@
   }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
+  // Render add list
   function renderList(){
     const q = (searchEl.value || '').toLowerCase();
     listEl.innerHTML = '';
@@ -53,12 +52,13 @@
         li.innerHTML = `
           <span>${escapeHtml(e.f)}</span>
           <span>${escapeHtml(e.n)}</span>
-          <button class="del" data-id="${e.id}">Удалить</button>
+          <button class="del" data-id="${e.id}" title="Удалить">✖</button>
         `;
         listEl.appendChild(li);
       });
   }
 
+  // Render review list
   function renderReview(){
     reviewListEl.innerHTML = '';
     entries.forEach(e => {
@@ -101,6 +101,7 @@
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
+  // Events
   modeAddBtn.addEventListener('click', () => setMode('add'));
   modeReviewBtn.addEventListener('click', () => setMode('review'));
 
@@ -130,57 +131,10 @@
 
   searchEl.addEventListener('input', renderList);
 
-  clearAllBtn.addEventListener('click', () => {
-    if (!confirm('Точно очистить все слова?')) return;
-    entries = [];
-    knownSet = new Set();
-    save();
-    saveKnown();
-    renderList();
-  });
-
-  shuffleBtn.addEventListener('click', () => {
-    for (let i = entries.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [entries[i], entries[j]] = [entries[j], entries[i]];
-    }
-    renderReview();
-  });
-
-  hideKnownEl.addEventListener('change', renderReview);
-
-  exportBtn.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'vocab.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-
-  importBtn.addEventListener('click', () => importFile.click());
-  importFile.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try{
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (!Array.isArray(data)) throw new Error('Неверный формат файла');
-      const normalized = data.map(x => ({ id: x.id || uid(), f: String(x.f||'').trim(), n: String(x.n||'').trim() }))
-        .filter(x => x.f && x.n);
-      entries = normalized.concat(entries);
-      save();
-      renderList();
-    } catch(err){
-      alert('Ошибка импорта: ' + err.message);
-    } finally {
-      importFile.value = '';
-    }
-  });
-
   function escapeHtml(s){
-    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
 
+  // Initial paint
   renderList();
 })();
