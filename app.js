@@ -58,7 +58,7 @@
   }
 
   // -------- Review mode --------
-  // Справа — native (русское, видно). Слева — foreign (иностранное, скрыто до клика).
+  // Справа — native (виден). Слева — foreign (скрыт до клика).
   function renderReview(order = entries){
     reviewListEl.innerHTML = '';
     order.forEach(e => {
@@ -69,11 +69,11 @@
         <span class="foreign">${escapeHtml(e.f)}</span>
         <span class="native">${escapeHtml(e.n)}</span>
       `;
-      // клик по русскому (справа) — показать/скрыть иностранное (слева)
+      // клик по правому — показать/скрыть левый
       li.querySelector('.native').addEventListener('click', () => {
         li.classList.toggle('revealed');
       });
-      // двойной клик по иностранному (слева) — пометить как выучено
+      // dblclick по левому — отметить как выученное (на будущее)
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
@@ -148,9 +148,8 @@
   searchEl.addEventListener('input', renderList);
 
   // Перемешивание — каждый клик даёт новый порядок
-  shuffleBtn.addEventListener('click', () => {
-    const shuffled = shuffle(entries);
-    renderReview(shuffled);
+  document.getElementById('shuffle').addEventListener('click', () => {
+    renderReview(shuffle(entries));
   });
 
   function escapeHtml(s){
@@ -160,5 +159,6 @@
   // Initial paint
   renderList();
 })();
+
 
 
