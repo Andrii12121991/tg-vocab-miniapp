@@ -42,14 +42,14 @@ h1{font-size:22px;margin:0}
 /* Формы */
 label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
 input[type="text"]{
-  padding:12px 14px;                 /* увеличенные отступы */
+  padding:12px 14px;
   border-radius:10px;
   border:1px solid var(--border);
   background:#ffffff;
   color:#000000;
-  font-size:18px;                    /* крупнее шрифт */
+  font-size:18px;            /* крупнее текст в инпутах */
   line-height:1.4;
-  -webkit-appearance:none;appearance:none; /* чтобы iOS не красил в синий */
+  -webkit-appearance:none;appearance:none;
 }
 .small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .actions{margin-top:8px}
@@ -58,7 +58,7 @@ button{
   padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
 }
 
-/* Список слов (режим Добавление) — компактно */
+/* Список слов (режим Добавление) */
 .list{list-style:none;padding:0;margin:12px 0 0 0}
 .item{
   display:grid;grid-template-columns:1fr 1fr auto;
@@ -66,9 +66,12 @@ button{
   border-bottom:1px dashed var(--border);
   padding:6px 0;
 }
-.item span{padding:4px 6px;border-radius:6px}
+.item span{
+  padding:4px 6px;border-radius:6px;
+  font-size:18px;            /* ↑ читаемость в списке */
+}
 
-/* Кнопка-иконка удаления (крестик) */
+/* Кнопка-иконка удаления */
 .item .del{
   background:transparent;border:none;color:var(--muted);
   font-size:18px;line-height:1;cursor:pointer;padding:4px 6px;
@@ -76,27 +79,28 @@ button{
 }
 .item .del:hover{color:var(--danger)}
 
-/* Режим Проверка:
-   справа — русское (native), слева — иностранное (foreign, скрыто до клика) */
+/* Режим Проверка: справа — русское; слева — иностранное (показывается по клику) */
 .review-row{
   display:grid;grid-template-columns:1fr 1fr;
   gap:8px;align-items:center;
   padding:10px 0;border-bottom:1px dashed var(--border)
 }
 
-/* иностранное (слева) — скрыто до клика */
+/* иностранное (слева) — скрыто до клика; БЕЗ подчёркивания */
 .review-row .foreign{
   justify-self:start;
   opacity:0.0;
-  border-bottom:1px dotted var(--border);
+  border-bottom:none;        /* ← убрали пунктирное подчёркивание */
+  font-size:18px;            /* ↑ чуть крупнее */
 }
 .review-row.revealed .foreign{opacity:1}
 
-/* русское (справа) — видно, выравниваем по ЛЕВОМУ краю внутри правой колонки */
+/* русское (справа) — видно, по левому краю */
 .review-row .native{
   font-weight:700;
   text-align:left;
   justify-self:start;
+  font-size:18px;            /* ↑ чуть крупнее */
 }
 
 /* Поиск */
@@ -104,3 +108,4 @@ button{
 
 /* Футер */
 footer{margin-top:16px;color:var(--muted)}
+
