@@ -17,6 +17,7 @@
       </div>
     </header>
 
+    <!-- Add mode -->
     <section id="add-section" class="card">
       <form id="add-form">
         <div class="row">
@@ -31,20 +32,17 @@
         </div>
         <div class="row actions">
           <button type="submit">Добавить</button>
-          <button type="button" id="clear-all" class="danger">Очистить всё</button>
         </div>
       </form>
 
       <div class="list-tools">
         <input id="search" type="text" placeholder="Поиск по словам..." />
-        <button id="export-json" title="Экспорт JSON">Экспорт</button>
-        <input id="import-file" type="file" accept="application/json" hidden />
-        <button id="import-json" title="Импорт JSON">Импорт</button>
       </div>
 
       <ul id="list" class="list"></ul>
     </section>
 
+    <!-- Review mode -->
     <section id="review-section" class="card hidden">
       <div class="row">
         <button id="shuffle">Перемешать</button>
