@@ -25,7 +25,6 @@
 
   const reviewListEl = document.getElementById('review-list');
   const shuffleBtn = document.getElementById('shuffle');
-  const hideKnownEl = document.getElementById('hide-known');
 
   // State
   const STORAGE_KEY = 'tg_vocab_entries_v1';
@@ -40,7 +39,7 @@
   }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-  // Render add list
+  // -------- Add mode --------
   function renderList(){
     const q = (searchEl.value || '').toLowerCase();
     listEl.innerHTML = '';
@@ -58,11 +57,10 @@
       });
   }
 
-  // Render review list
-  function renderReview(){
+  // -------- Review mode --------
+  function renderReview(order = entries){
     reviewListEl.innerHTML = '';
-    entries.forEach(e => {
-      if (hideKnownEl.checked && knownSet.has(e.id)) return;
+    order.forEach(e => {
       const li = document.createElement('li');
       li.className = 'review-row';
       li.dataset.id = e.id;
@@ -70,16 +68,26 @@
         <span class="native">${escapeHtml(e.n)}</span>
         <span class="foreign">${escapeHtml(e.f)}</span>
       `;
+      // показать/скрыть оригинал по клику на перевод
       li.querySelector('.native').addEventListener('click', () => {
         li.classList.toggle('revealed');
       });
+      // двойной клик по оригиналу — отметить как выученное (оставим для себя)
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
-        renderReview();
       });
       reviewListEl.appendChild(li);
     });
+  }
+
+  function shuffle(arr){
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
 
   function setMode(mode){
@@ -101,15 +109,22 @@
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  // Events
+  // -------- Events --------
   modeAddBtn.addEventListener('click', () => setMode('add'));
   modeReviewBtn.addEventListener('click', () => setMode('review'));
 
   addForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const f = foreignInput.value.trim();
-    const n = nativeInput.value.trim();
+    let f = foreignInput.value.trim();
+    let n = nativeInput.value.trim();
     if (!f || !n) return;
+
+    // защита от дублей
+    const fKey = f.toLowerCase();
+    const nKey = n.toLowerCase();
+    const isDup = entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey);
+    if (isDup) { alert('Такая пара уже есть в списке.'); return; }
+
     entries.unshift({ id: uid(), f, n });
     foreignInput.value = '';
     nativeInput.value = '';
@@ -131,6 +146,12 @@
 
   searchEl.addEventListener('input', renderList);
 
+  // Перемешивание — каждый клик даёт новый порядок
+  shuffleBtn.addEventListener('click', () => {
+    const shuffled = shuffle(entries);
+    renderReview(shuffled);
+  });
+
   function escapeHtml(s){
     return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
@@ -138,3 +159,4 @@
   // Initial paint
   renderList();
 })();
+
