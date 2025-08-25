@@ -1,59 +1,109 @@
-<!doctype html>
+<!-- index.html -->
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Личный словарь</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <header>
-      <h1>Личный словарь</h1>
-      <div class="mode-switch">
-        <button id="mode-add" class="active">Добавление</button>
-        <button id="mode-review">Проверка</button>
-      </div>
-    </header>
+  <div class="container">
+    <h1>Личный словарь</h1>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('add')">Добавление</button>
+      <button class="tab" onclick="switchTab('check')">Проверка</button>
+    </div>
 
-    <!-- Add mode -->
-    <section id="add-section" class="card">
-      <form id="add-form">
-        <div class="row">
-          <label>
-            Иностранное слово
-            <input id="foreign" type="text" placeholder="cat / run / beautiful" required />
-          </label>
-          <label>
-            Перевод
-            <input id="native" type="text" placeholder="кот / бегать / красивый" required />
-          </label>
-        </div>
-        <div class="row actions">
-          <button type="submit">Добавить</button>
-        </div>
-      </form>
+    <div id="add-tab" class="tab-content">
+      <label>Иностранное слово</label>
+      <input type="text" id="foreign-word" />
 
-      <div class="list-tools">
-        <input id="search" type="text" placeholder="Поиск по словам..." />
-      </div>
+      <label>Перевод</label>
+      <input type="text" id="translation" />
 
-      <ul id="list" class="list"></ul>
-    </section>
+      <button onclick="addWord()">Добавить</button>
 
-    <!-- Review mode -->
-    <section id="review-section" class="card hidden">
-      <div class="row">
-        <button id="shuffle">Перемешать</button>
-      </div>
-      <ul id="review-list" class="list"></ul>
-    </section>
+      <input type="text" id="search" placeholder="Поиск по словам..." oninput="renderWords()" />
+      <ul id="word-list"></ul>
+    </div>
 
-    <footer>
-      <small>Данные хранятся локально в вашем браузере.</small>
-    </footer>
+    <div id="check-tab" class="tab-content" style="display: none;">
+      <button onclick="generateQuiz()">Начать проверку</button>
+      <div id="quiz"></div>
+    </div>
   </div>
-  <script src="app.js"></script>
+
+  <script>
+    let words = [];
+
+    async function fetchWords() {
+      const res = await fetch('/api/words');
+      const data = await res.json();
+      words = data;
+      renderWords();
+    }
+
+    async function addWord() {
+      const foreign = document.getElementById('foreign-word').value.trim();
+      const translation = document.getElementById('translation').value.trim();
+      if (!foreign || !translation) return alert('Заполните оба поля');
+
+      await fetch('/api/words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ foreign, translation })
+      });
+
+      document.getElementById('foreign-word').value = '';
+      document.getElementById('translation').value = '';
+
+      fetchWords();
+    }
+
+    function renderWords() {
+      const list = document.getElementById('word-list');
+      const search = document.getElementById('search').value.toLowerCase();
+      list.innerHTML = '';
+      words.filter(w => w.foreign.toLowerCase().includes(search)).forEach(w => {
+        const li = document.createElement('li');
+        li.textContent = `${w.foreign} — ${w.translation}`;
+        list.appendChild(li);
+      });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      document.querySelector(`.tab[onclick*='${tab}']`).classList.add('active');
+      document.getElementById(`${tab}-tab`).style.display = 'block';
+    }
+
+    function generateQuiz() {
+      const quizDiv = document.getElementById('quiz');
+      quizDiv.innerHTML = '';
+      const shuffled = [...words].sort(() => 0.5 - Math.random()).slice(0, 5);
+
+      shuffled.forEach((word, i) => {
+        const question = document.createElement('div');
+        question.innerHTML = `
+          <label>${i + 1}. ${word.foreign}</label>
+          <input type="text" onblur="checkAnswer(this, '${word.translation}')" />
+        `;
+        quizDiv.appendChild(question);
+      });
+    }
+
+    function checkAnswer(input, correct) {
+      if (input.value.trim().toLowerCase() === correct.toLowerCase()) {
+        input.style.borderColor = 'green';
+      } else {
+        input.style.borderColor = 'red';
+      }
+    }
+
+    fetchWords();
+  </script>
 </body>
 </html>
+
