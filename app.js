@@ -1,5 +1,3 @@
-<!-- напоминание: этот файл кладём как /app.js и подключён уже в index.html -->
-<script>
 (function(){
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg) {
@@ -13,9 +11,8 @@
     tg.BackButton.onClick(() => setMode('add'));
   }
 
-  // ---------- Cloud API ----------
-  const INIT_DATA = tg?.initData || ""; // из Telegram — нужен, чтобы сервер понял, кто пользователь
-
+  // --------- Cloud API (через Vercel serverless) ---------
+  const INIT_DATA = tg?.initData || ""; // Telegram WebApp initData
   async function apiGet(){
     const r = await fetch('/api/words', { headers:{ 'X-Telegram-Init-Data': INIT_DATA }});
     if (!r.ok) throw new Error('GET failed');
@@ -37,9 +34,9 @@
     });
     if (!r.ok && r.status !== 204) throw new Error('DELETE failed');
   }
-  const canUseCloud = () => Boolean(INIT_DATA);
+  function canUseCloud(){ return Boolean(INIT_DATA); }
 
-  // ---------- DOM ----------
+  // Elements
   const modeAddBtn = document.getElementById('mode-add');
   const modeReviewBtn = document.getElementById('mode-review');
   const addSection = document.getElementById('add-section');
@@ -54,7 +51,7 @@
   const reviewListEl = document.getElementById('review-list');
   const shuffleBtn = document.getElementById('shuffle');
 
-  // ---------- State (локальный кэш) ----------
+  // State
   const STORAGE_KEY = 'tg_vocab_entries_v1';
   const KNOWN_KEY = 'tg_vocab_known_v1';
   let entries = readJson(STORAGE_KEY, []);
@@ -67,7 +64,7 @@
   }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-  // ---------- Режим «Добавление» ----------
+  // -------- Add mode --------
   function renderList(){
     const q = (searchEl.value || '').toLowerCase();
     listEl.innerHTML = '';
@@ -85,7 +82,7 @@
       });
   }
 
-  // ---------- Режим «Проверка» ----------
+  // -------- Review mode --------
   function renderReview(order = entries){
     reviewListEl.innerHTML = '';
     order.forEach(e => {
@@ -97,7 +94,7 @@
         <span class="native">${escapeHtml(e.n)}</span>
       `;
       li.querySelector('.native').addEventListener('click', () => {
-        li.classList.toggle('revealed'); // показать/скрыть левое слово
+        li.classList.toggle('revealed');
       });
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
@@ -135,7 +132,7 @@
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  // ---------- События ----------
+  // -------- Events --------
   modeAddBtn.addEventListener('click', () => setMode('add'));
   modeReviewBtn.addEventListener('click', () => setMode('review'));
 
@@ -146,11 +143,12 @@
     if (!f || !n) return;
 
     // защита от дублей
-    const fKey = f.toLowerCase(), nKey = n.toLowerCase();
-    if (entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey)) {
-      alert('Такая пара уже есть в списке.'); return;
-    }
+    const fKey = f.toLowerCase();
+    const nKey = n.toLowerCase();
+    const isDup = entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey);
+    if (isDup) { alert('Такая пара уже есть в списке.'); return; }
 
+    // Пытаемся сохранить в облако; при ошибке — локально
     try {
       if (canUseCloud()){
         const created = await apiAdd(f, n);
@@ -175,31 +173,35 @@
     if (!btn) return;
     const id = btn.dataset.id;
 
+    // Сначала пробуем удалить в облаке (если есть id от сервера)
     try { if (canUseCloud()) await apiDel(id); } catch(err){ console.warn('Cloud delete failed', err); }
 
     entries = entries.filter(x => x.id !== id);
     knownSet.delete(id);
-    save(); saveKnown();
+    save();
+    saveKnown();
     renderList();
   });
 
   searchEl.addEventListener('input', renderList);
+
   document.getElementById('shuffle').addEventListener('click', () => {
     renderReview(shuffle(entries));
   });
 
   function escapeHtml(s){
-    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
 
-  // ---------- Первичная загрузка ----------
+  // -------- Initial load --------
   (async () => {
     try {
       if (canUseCloud()){
         const remote = await apiGet();
         if (Array.isArray(remote)) {
+          // Переписываем локально тем, что на сервере
           entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
-          save(); // обновим локальный кэш, чтобы оффлайн тоже работал
+          save();
         }
       }
     } catch (e) {
@@ -208,4 +210,4 @@
     renderList();
   })();
 })();
-</script>
+
