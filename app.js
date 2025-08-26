@@ -1,61 +1,38 @@
 (function(){
-  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  if (tg) {
-    tg.expand();
-    tg.ready();
-    const theme = tg.themeParams || {};
-    if (theme.bg_color) document.documentElement.style.setProperty('--bg', theme.bg_color);
-    if (theme.text_color) document.documentElement.style.setProperty('--text', theme.text_color);
-    if (theme.secondary_bg_color) document.documentElement.style.setProperty('--card', theme.secondary_bg_color);
-    if (theme.button_color) document.documentElement.style.setProperty('--accent', theme.button_color);
-    tg.BackButton.onClick(() => setMode('add'));
-  }
-
-  // --------- Cloud API (через Vercel serverless) ---------
-  const INIT_DATA = tg?.initData || ""; // Telegram WebApp initData
-  async function apiGet(){
-    const r = await fetch('/api/words', { headers:{ 'X-Telegram-Init-Data': INIT_DATA }});
-    if (!r.ok) throw new Error('GET failed');
-    return await r.json(); // [{id,f,n,created_at},...]
-  }
-  async function apiAdd(f,n){
-    const r = await fetch('/api/words', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'X-Telegram-Init-Data': INIT_DATA },
-      body: JSON.stringify({ f, n })
-    });
-    if (!r.ok) throw new Error('POST failed');
-    return await r.json(); // {id,f,n,created_at}
-  }
-  async function apiDel(id){
-    const r = await fetch('/api/words/'+id, {
-      method:'DELETE',
-      headers:{ 'X-Telegram-Init-Data': INIT_DATA }
-    });
-    if (!r.ok && r.status !== 204) throw new Error('DELETE failed');
-  }
-  function canUseCloud(){ return Boolean(INIT_DATA); }
+  // Больше НЕ подстраиваемся под тему Telegram (оставляем светлую по умолчанию).
+  // Если захочешь снова включить автотему — скажи, верну 5 строк.
 
   // Elements
-  const modeAddBtn = document.getElementById('mode-add');
+  const modeAddBtn    = document.getElementById('mode-add');
   const modeReviewBtn = document.getElementById('mode-review');
-  const addSection = document.getElementById('add-section');
+  const addSection    = document.getElementById('add-section');
   const reviewSection = document.getElementById('review-section');
 
-  const addForm = document.getElementById('add-form');
+  const addForm      = document.getElementById('add-form');
   const foreignInput = document.getElementById('foreign');
-  const nativeInput = document.getElementById('native');
-  const listEl = document.getElementById('list');
-  const searchEl = document.getElementById('search');
+  const nativeInput  = document.getElementById('native');
+  const listEl       = document.getElementById('list');
+  const searchEl     = document.getElementById('search');
 
   const reviewListEl = document.getElementById('review-list');
-  const shuffleBtn = document.getElementById('shuffle');
+  const shuffleBtn   = document.getElementById('shuffle');
 
-  // State
+  // Storage
   const STORAGE_KEY = 'tg_vocab_entries_v1';
-  const KNOWN_KEY = 'tg_vocab_known_v1';
-  let entries = readJson(STORAGE_KEY, []);
+  const KNOWN_KEY   = 'tg_vocab_known_v1';
+
+  let entries  = readJson(STORAGE_KEY, []);
   let knownSet = new Set(readJson(KNOWN_KEY, []));
+
+  // --- Миграция старых данных (если есть) ---
+  // Пробегаем по всем ключам localStorage и пытаемся распознать формат словарных пар.
+  if (!entries.length) {
+    const migrated = tryMigrateFromLegacy();
+    if (migrated.length) {
+      entries = migrated;
+      save();
+    }
+  }
 
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
   function saveKnown(){ localStorage.setItem(KNOWN_KEY, JSON.stringify(Array.from(knownSet))); }
@@ -63,6 +40,33 @@
     try{ return JSON.parse(localStorage.getItem(key)) || fallback }catch{ return fallback }
   }
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function tryMigrateFromLegacy(){
+    const out = [];
+    const seen = new Set();
+    for (let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if (k === STORAGE_KEY || k === KNOWN_KEY) continue;
+      let data;
+      try { data = JSON.parse(localStorage.getItem(k)); } catch { data = null; }
+      if (!Array.isArray(data)) continue;
+
+      data.forEach(item=>{
+        if (!item || typeof item !== 'object') return;
+        // Нормальные поля
+        let f = item.f ?? item.foreign ?? item.left ?? item.word ?? item.term;
+        let n = item.n ?? item.native  ?? item.right ?? item.translation ?? item.meaning ?? item.value;
+        if (typeof f === 'string' && typeof n === 'string'){
+          const key = (f.trim().toLowerCase()+'|'+n.trim().toLowerCase());
+          if (!seen.has(key)){
+            seen.add(key);
+            out.push({ id: uid(), f: f.trim(), n: n.trim() });
+          }
+        }
+      });
+    }
+    return out;
+  }
 
   // -------- Add mode --------
   function renderList(){
@@ -83,6 +87,7 @@
   }
 
   // -------- Review mode --------
+  // Справа — native (виден). Слева — foreign (скрыт до клика).
   function renderReview(order = entries){
     reviewListEl.innerHTML = '';
     order.forEach(e => {
@@ -93,9 +98,11 @@
         <span class="foreign">${escapeHtml(e.f)}</span>
         <span class="native">${escapeHtml(e.n)}</span>
       `;
+      // клик по правому — показать/скрыть левый
       li.querySelector('.native').addEventListener('click', () => {
         li.classList.toggle('revealed');
       });
+      // dblclick по левому — отметить как выученное (на будущее)
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
@@ -120,23 +127,22 @@
       modeAddBtn.classList.remove('active');
       modeReviewBtn.classList.add('active');
       renderReview();
-      if (tg){ tg.BackButton.show(); }
+      window.scrollTo({top:0, behavior:'smooth'});
     } else {
       reviewSection.classList.add('hidden');
       addSection.classList.remove('hidden');
       modeReviewBtn.classList.remove('active');
       modeAddBtn.classList.add('active');
       renderList();
-      if (tg){ tg.BackButton.hide(); }
+      window.scrollTo({top:0, behavior:'smooth'});
     }
-    window.scrollTo({top:0, behavior:'smooth'});
   }
 
   // -------- Events --------
-  modeAddBtn.addEventListener('click', () => setMode('add'));
-  modeReviewBtn.addEventListener('click', () => setMode('review'));
+  modeAddBtn.addEventListener('click',   () => setMode('add'));
+  modeReviewBtn.addEventListener('click',() => setMode('review'));
 
-  addForm.addEventListener('submit', async (e) => {
+  addForm.addEventListener('submit', (e) => {
     e.preventDefault();
     let f = foreignInput.value.trim();
     let n = nativeInput.value.trim();
@@ -148,34 +154,18 @@
     const isDup = entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey);
     if (isDup) { alert('Такая пара уже есть в списке.'); return; }
 
-    // Пытаемся сохранить в облако; при ошибке — локально
-    try {
-      if (canUseCloud()){
-        const created = await apiAdd(f, n);
-        entries.unshift({ id: created.id, f: created.f, n: created.n });
-      } else {
-        entries.unshift({ id: uid(), f, n });
-      }
-    } catch (err) {
-      console.warn('Cloud save failed, fallback to local:', err);
-      entries.unshift({ id: uid(), f, n });
-    }
-
+    entries.unshift({ id: uid(), f, n });
     foreignInput.value = '';
-    nativeInput.value = '';
+    nativeInput.value  = '';
     save();
     renderList();
     foreignInput.focus();
   });
 
-  listEl.addEventListener('click', async (e) => {
+  listEl.addEventListener('click', (e) => {
     const btn = e.target.closest('button.del');
     if (!btn) return;
     const id = btn.dataset.id;
-
-    // Сначала пробуем удалить в облаке (если есть id от сервера)
-    try { if (canUseCloud()) await apiDel(id); } catch(err){ console.warn('Cloud delete failed', err); }
-
     entries = entries.filter(x => x.id !== id);
     knownSet.delete(id);
     save();
@@ -185,29 +175,17 @@
 
   searchEl.addEventListener('input', renderList);
 
-  document.getElementById('shuffle').addEventListener('click', () => {
+  // Перемешивание — каждый клик даёт новый порядок
+  shuffleBtn.addEventListener('click', () => {
     renderReview(shuffle(entries));
   });
 
   function escapeHtml(s){
-    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   }
 
-  // -------- Initial load --------
-  (async () => {
-    try {
-      if (canUseCloud()){
-        const remote = await apiGet();
-        if (Array.isArray(remote)) {
-          // Переписываем локально тем, что на сервере
-          entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
-          save();
-        }
-      }
-    } catch (e) {
-      console.warn('Cloud load failed, keep local cache.', e);
-    }
-    renderList();
-  })();
+  // Initial paint
+  renderList();
 })();
+
 
