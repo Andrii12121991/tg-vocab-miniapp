@@ -11,6 +11,31 @@
     tg.BackButton.onClick(() => setMode('add'));
   }
 
+  // --------- Cloud API (через Vercel serverless) ---------
+  const INIT_DATA = tg?.initData || ""; // Telegram WebApp initData
+  async function apiGet(){
+    const r = await fetch('/api/words', { headers:{ 'X-Telegram-Init-Data': INIT_DATA }});
+    if (!r.ok) throw new Error('GET failed');
+    return await r.json(); // [{id,f,n,created_at},...]
+  }
+  async function apiAdd(f,n){
+    const r = await fetch('/api/words', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-Telegram-Init-Data': INIT_DATA },
+      body: JSON.stringify({ f, n })
+    });
+    if (!r.ok) throw new Error('POST failed');
+    return await r.json(); // {id,f,n,created_at}
+  }
+  async function apiDel(id){
+    const r = await fetch('/api/words/'+id, {
+      method:'DELETE',
+      headers:{ 'X-Telegram-Init-Data': INIT_DATA }
+    });
+    if (!r.ok && r.status !== 204) throw new Error('DELETE failed');
+  }
+  function canUseCloud(){ return Boolean(INIT_DATA); }
+
   // Elements
   const modeAddBtn = document.getElementById('mode-add');
   const modeReviewBtn = document.getElementById('mode-review');
@@ -58,7 +83,6 @@
   }
 
   // -------- Review mode --------
-  // Справа — native (виден). Слева — foreign (скрыт до клика).
   function renderReview(order = entries){
     reviewListEl.innerHTML = '';
     order.forEach(e => {
@@ -69,11 +93,9 @@
         <span class="foreign">${escapeHtml(e.f)}</span>
         <span class="native">${escapeHtml(e.n)}</span>
       `;
-      // клик по правому — показать/скрыть левый
       li.querySelector('.native').addEventListener('click', () => {
         li.classList.toggle('revealed');
       });
-      // dblclick по левому — отметить как выученное (на будущее)
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
@@ -114,7 +136,7 @@
   modeAddBtn.addEventListener('click', () => setMode('add'));
   modeReviewBtn.addEventListener('click', () => setMode('review'));
 
-  addForm.addEventListener('submit', (e) => {
+  addForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     let f = foreignInput.value.trim();
     let n = nativeInput.value.trim();
@@ -126,7 +148,19 @@
     const isDup = entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey);
     if (isDup) { alert('Такая пара уже есть в списке.'); return; }
 
-    entries.unshift({ id: uid(), f, n });
+    // Пытаемся сохранить в облако; при ошибке — локально
+    try {
+      if (canUseCloud()){
+        const created = await apiAdd(f, n);
+        entries.unshift({ id: created.id, f: created.f, n: created.n });
+      } else {
+        entries.unshift({ id: uid(), f, n });
+      }
+    } catch (err) {
+      console.warn('Cloud save failed, fallback to local:', err);
+      entries.unshift({ id: uid(), f, n });
+    }
+
     foreignInput.value = '';
     nativeInput.value = '';
     save();
@@ -134,10 +168,14 @@
     foreignInput.focus();
   });
 
-  listEl.addEventListener('click', (e) => {
+  listEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('button.del');
     if (!btn) return;
     const id = btn.dataset.id;
+
+    // Сначала пробуем удалить в облаке (если есть id от сервера)
+    try { if (canUseCloud()) await apiDel(id); } catch(err){ console.warn('Cloud delete failed', err); }
+
     entries = entries.filter(x => x.id !== id);
     knownSet.delete(id);
     save();
@@ -147,7 +185,6 @@
 
   searchEl.addEventListener('input', renderList);
 
-  // Перемешивание — каждый клик даёт новый порядок
   document.getElementById('shuffle').addEventListener('click', () => {
     renderReview(shuffle(entries));
   });
@@ -156,9 +193,24 @@
     return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
 
-  // Initial paint
-  renderList();
+  // -------- Initial load --------
+  (async () => {
+    try {
+      if (canUseCloud()){
+        const remote = await apiGet();
+        if (Array.isArray(remote)) {
+          // Переписываем локально тем, что на сервере
+          entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
+          save();
+        }
+      }
+    } catch (e) {
+      console.warn('Cloud load failed, keep local cache.', e);
+    }
+    renderList();
+  })();
 })();
+
 
 
 
