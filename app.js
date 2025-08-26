@@ -193,22 +193,53 @@
     return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
 
-  // -------- Initial load --------
-  (async () => {
-    try {
-      if (canUseCloud()){
-        const remote = await apiGet();
-        if (Array.isArray(remote)) {
-          // Переписываем локально тем, что на сервере
-          entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
-          save();
+  // -------- Initial load with one-time local -> cloud migration --------
+(async () => {
+  try {
+    if (canUseCloud()){
+      const remote = await apiGet();               // что есть в облаке сейчас
+      const cloud = Array.isArray(remote) ? remote : [];
+
+      // Нормализаторы для сравнения без регистра/пробелов
+      const norm = s => (s || '').trim().toLowerCase();
+      const keyOf = x => `${norm(x.f)}||${norm(x.n)}`;
+
+      // Снимок того, что лежит локально на этом устройстве (это «твои старые слова»)
+      const localSnapshot = readJson(STORAGE_KEY, []);
+
+      // Построим множество пар, которые УЖЕ есть в облаке
+      const cloudKeys = new Set(cloud.map(keyOf));
+
+      // Что отсутствует в облаке, но есть локально — это кандидаты на миграцию
+      const toMigrate = localSnapshot.filter(x => !cloudKeys.has(keyOf(x)));
+
+      let imported = 0;
+      for (const item of toMigrate){
+        try {
+          const created = await apiAdd(item.f, item.n);
+          cloud.push(created);
+          cloudKeys.add(keyOf(created));
+          imported++;
+        } catch(e){
+          console.warn('Failed to import one item', item, e);
         }
       }
-    } catch (e) {
-      console.warn('Cloud load failed, keep local cache.', e);
+
+      // Теперь источником истины становимся облаком
+      entries = cloud.map(r => ({ id:r.id, f:r.f, n:r.n }));
+      save(); // обновим локальный кэш текущим облачным состоянием
+
+      if (imported > 0) {
+        try { alert(`Импортировано из локального хранилища: ${imported}`); } catch {}
+      }
     }
-    renderList();
-  })();
+  } catch (e) {
+    console.warn('Cloud load failed, keep local cache.', e);
+    // останемся на локальном кэше
+  }
+  renderList();
+})();
+
 })();
 
 
