@@ -1,59 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Личный словарь</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <h1>Личный словарь</h1>
-      <div class="mode-switch">
-        <button id="mode-add" class="active">Добавление</button>
-        <button id="mode-review">Проверка</button>
-      </div>
-    </header>
+  <main>
+    <h1>Личный словарь</h1>
 
-    <!-- Add mode -->
+    <div class="tabs">
+      <button id="mode-add" class="active">Добавление</button>
+      <button id="mode-review">Проверка</button>
+    </div>
+
+    <!-- Добавление -->
     <section id="add-section" class="card">
       <form id="add-form">
-        <div class="row">
-          <label>
-            Иностранное слово
-            <input id="foreign" type="text" placeholder="cat / run / beautiful" required />
-          </label>
-          <label>
-            Перевод
-            <input id="native" type="text" placeholder="кот / бегать / красивый" required />
-          </label>
-        </div>
-        <div class="row actions">
-          <button type="submit">Добавить</button>
-        </div>
+        <label>
+          Иностранное слово
+          <input id="foreign" autocomplete="off" placeholder="cat / run / beautiful">
+        </label>
+        <label>
+          Перевод
+          <input id="native" autocomplete="off" placeholder="кот / бегать / красивый">
+        </label>
+        <button type="submit">Добавить</button>
       </form>
-
-      <div class="list-tools">
-        <input id="search" type="text" placeholder="Поиск по словам..." />
-      </div>
-
+      <input id="search" placeholder="Поиск по словам...">
       <ul id="list" class="list"></ul>
     </section>
 
-    <!-- Review mode -->
+    <!-- Проверка -->
     <section id="review-section" class="card hidden">
       <div class="row">
         <button id="shuffle">Перемешать</button>
+        <button id="review-toggle" type="button">Режим: Перевод</button>
       </div>
       <ul id="review-list" class="list"></ul>
     </section>
+  </main>
 
-    <footer>
-      <small>Данные хранятся локально в вашем браузере.</small>
-    </footer>
-  </div>
+  <p class="note">Данные хранятся локально в вашем браузере.</p>
+
   <script src="app.js"></script>
 </body>
 </html>
+
