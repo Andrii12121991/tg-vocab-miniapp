@@ -1,4 +1,6 @@
-(function(){
+// ===== tg-vocab miniapp: front-end =====
+(function () {
+  // --- Telegram theme + helpers ---
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg) {
     tg.expand();
@@ -11,32 +13,36 @@
     tg.BackButton.onClick(() => setMode('add'));
   }
 
-  // --------- Cloud API (через Vercel serverless) ---------
-  const INIT_DATA = tg?.initData || ""; // Telegram WebApp initData
-  async function apiGet(){
-    const r = await fetch('/api/words', { headers:{ 'X-Telegram-Init-Data': INIT_DATA }});
+  // --- Cloud API (Vercel serverless) ---
+  const INIT_DATA = tg?.initData || "";
+
+  function canUseCloud() { return Boolean(INIT_DATA); }
+
+  async function apiGet() {
+    const r = await fetch('/api/words', { headers: { 'X-Telegram-Init-Data': INIT_DATA } });
     if (!r.ok) throw new Error('GET failed');
-    return await r.json(); // [{id,f,n,created_at},...]
+    return await r.json();
   }
-  async function apiAdd(f,n){
+
+  async function apiAdd(f, n) {
     const r = await fetch('/api/words', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'X-Telegram-Init-Data': INIT_DATA },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': INIT_DATA },
       body: JSON.stringify({ f, n })
     });
     if (!r.ok) throw new Error('POST failed');
-    return await r.json(); // {id,f,n,created_at}
+    return await r.json();
   }
-  async function apiDel(id){
-    const r = await fetch('/api/words/'+id, {
-      method:'DELETE',
-      headers:{ 'X-Telegram-Init-Data': INIT_DATA }
+
+  async function apiDel(id) {
+    const r = await fetch('/api/words/' + id, {
+      method: 'DELETE',
+      headers: { 'X-Telegram-Init-Data': INIT_DATA }
     });
     if (!r.ok && r.status !== 204) throw new Error('DELETE failed');
   }
-  function canUseCloud(){ return Boolean(INIT_DATA); }
 
-  // Elements
+  // --- Elements ---
   const modeAddBtn = document.getElementById('mode-add');
   const modeReviewBtn = document.getElementById('mode-review');
   const addSection = document.getElementById('add-section');
@@ -51,21 +57,46 @@
   const reviewListEl = document.getElementById('review-list');
   const shuffleBtn = document.getElementById('shuffle');
 
-  // State
+  // --- Small UI: toggle button near "shuffle" (no HTML changes needed) ---
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'review-toggle';
+  toggleBtn.className = 'small'; // использую имеющийся маленький стиль кнопки (если он есть); иначе будет как обычная
+  // Режимы: 'byNative' = как сейчас (список переводов; клик по правому показывает левое)
+  //         'byForeign' = новый режим (список иностранных; клик по левому показывает правое)
+  let reviewMode = 'byNative';
+
+  function updateToggleCaption() {
+    // Показываем текущий режим в кнопке, чтобы было понятно
+    toggleBtn.textContent = reviewMode === 'byNative' ? 'Режим: Перевод' : 'Режим: Значение';
+  }
+  updateToggleCaption();
+
+  // Вставим кнопку сразу после "Перемешать"
+  if (shuffleBtn && shuffleBtn.parentNode) {
+    shuffleBtn.parentNode.insertBefore(toggleBtn, shuffleBtn.nextSibling);
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    reviewMode = (reviewMode === 'byNative') ? 'byForeign' : 'byNative';
+    updateToggleCaption();
+    renderReview(); // перерисовать с тем же порядком
+  });
+
+  // --- State + local storage ---
   const STORAGE_KEY = 'tg_vocab_entries_v1';
   const KNOWN_KEY = 'tg_vocab_known_v1';
   let entries = readJson(STORAGE_KEY, []);
   let knownSet = new Set(readJson(KNOWN_KEY, []));
 
-  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
-  function saveKnown(){ localStorage.setItem(KNOWN_KEY, JSON.stringify(Array.from(knownSet))); }
-  function readJson(key, fallback){
-    try{ return JSON.parse(localStorage.getItem(key)) || fallback }catch{ return fallback }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+  function saveKnown() { localStorage.setItem(KNOWN_KEY, JSON.stringify(Array.from(knownSet))); }
+  function readJson(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback } catch { return fallback }
   }
-  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
-  // -------- Add mode --------
-  function renderList(){
+  // --- Add mode list ---
+  function renderList() {
     const q = (searchEl.value || '').toLowerCase();
     listEl.innerHTML = '';
     entries
@@ -82,57 +113,90 @@
       });
   }
 
-  // -------- Review mode --------
-  function renderReview(order = entries){
+  // --- Review mode ---
+  // вспомогательная отрисовка одной строки под конкретный режим
+  function buildReviewRow(e) {
+    const li = document.createElement('li');
+    li.className = 'review-row';
+    li.dataset.id = e.id;
+
+    const left = document.createElement('span');
+    left.className = 'foreign';
+    left.textContent = e.f;
+
+    const right = document.createElement('span');
+    right.className = 'native';
+    right.textContent = e.n;
+
+    li.appendChild(left);
+    li.appendChild(right);
+
+    // Две зеркальные логики (без правки CSS):
+    if (reviewMode === 'byNative') {
+      // показываем список ПРАВЫХ слов; ЛЕВАЯ часть скрыта, показывается по клику на правую
+      left.style.visibility = 'hidden';
+      right.style.visibility = 'visible';
+
+      right.addEventListener('click', () => {
+        const hidden = left.style.visibility !== 'visible';
+        left.style.visibility = hidden ? 'visible' : 'hidden';
+      });
+    } else {
+      // показываем список ЛЕВЫХ слов; ПРАВАЯ часть скрыта, показывается по клику на левую
+      left.style.visibility = 'visible';
+      right.style.visibility = 'hidden';
+
+      left.addEventListener('click', () => {
+        const hidden = right.style.visibility !== 'visible';
+        right.style.visibility = hidden ? 'visible' : 'hidden';
+      });
+    }
+
+    // двойной клик по левому, как и раньше — отметить известное слово
+    left.addEventListener('dblclick', () => {
+      if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
+      saveKnown();
+    });
+
+    return li;
+  }
+
+  function renderReview(order = entries) {
     reviewListEl.innerHTML = '';
     order.forEach(e => {
-      const li = document.createElement('li');
-      li.className = 'review-row';
-      li.dataset.id = e.id;
-      li.innerHTML = `
-        <span class="foreign">${escapeHtml(e.f)}</span>
-        <span class="native">${escapeHtml(e.n)}</span>
-      `;
-      li.querySelector('.native').addEventListener('click', () => {
-        li.classList.toggle('revealed');
-      });
-      li.querySelector('.foreign').addEventListener('dblclick', () => {
-        if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
-        saveKnown();
-      });
-      reviewListEl.appendChild(li);
+      reviewListEl.appendChild(buildReviewRow(e));
     });
   }
 
-  function shuffle(arr){
+  function shuffle(arr) {
     const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--){
+    for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
   }
 
-  function setMode(mode){
-    if (mode === 'review'){
+  function setMode(mode) {
+    if (mode === 'review') {
       addSection.classList.add('hidden');
       reviewSection.classList.remove('hidden');
       modeAddBtn.classList.remove('active');
       modeReviewBtn.classList.add('active');
       renderReview();
-      if (tg){ tg.BackButton.show(); }
+      if (tg) { tg.BackButton.show(); }
     } else {
       reviewSection.classList.add('hidden');
       addSection.classList.remove('hidden');
       modeReviewBtn.classList.remove('active');
       modeAddBtn.classList.add('active');
       renderList();
-      if (tg){ tg.BackButton.hide(); }
+      if (tg) { tg.BackButton.hide(); }
     }
-    window.scrollTo({top:0, behavior:'smooth'});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // -------- Events --------
+  // --- Events ---
   modeAddBtn.addEventListener('click', () => setMode('add'));
   modeReviewBtn.addEventListener('click', () => setMode('review'));
 
@@ -142,15 +206,14 @@
     let n = nativeInput.value.trim();
     if (!f || !n) return;
 
-    // защита от дублей
+    // антидубликаты
     const fKey = f.toLowerCase();
     const nKey = n.toLowerCase();
     const isDup = entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey);
     if (isDup) { alert('Такая пара уже есть в списке.'); return; }
 
-    // Пытаемся сохранить в облако; при ошибке — локально
     try {
-      if (canUseCloud()){
+      if (canUseCloud()) {
         const created = await apiAdd(f, n);
         entries.unshift({ id: created.id, f: created.f, n: created.n });
       } else {
@@ -173,8 +236,7 @@
     if (!btn) return;
     const id = btn.dataset.id;
 
-    // Сначала пробуем удалить в облаке (если есть id от сервера)
-    try { if (canUseCloud()) await apiDel(id); } catch(err){ console.warn('Cloud delete failed', err); }
+    try { if (canUseCloud()) await apiDel(id); } catch (err) { console.warn('Cloud delete failed', err); }
 
     entries = entries.filter(x => x.id !== id);
     knownSet.delete(id);
@@ -185,31 +247,31 @@
 
   searchEl.addEventListener('input', renderList);
 
-  document.getElementById('shuffle').addEventListener('click', () => {
+  shuffleBtn.addEventListener('click', () => {
     renderReview(shuffle(entries));
   });
 
-  function escapeHtml(s){
-    return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+  function escapeHtml(s) {
+    return s.replace(/[&<>"]+/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
 
-// -------- Initial load --------
-(async () => {
-  try {
-    if (canUseCloud()){
-      const remote = await apiGet();
-      if (Array.isArray(remote)) {
-        entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
-        save();
+  // --- Initial load ---
+  (async () => {
+    try {
+      if (canUseCloud()) {
+        const remote = await apiGet();
+        if (Array.isArray(remote)) {
+          entries = remote.map(r => ({ id: r.id, f: r.f, n: r.n }));
+          save();
+        }
       }
+    } catch (e) {
+      console.warn('Cloud load failed, keep local cache.', e);
     }
-  } catch (e) {
-    console.warn('Cloud load failed, keep local cache.', e);
-  }
-  renderList();
+    renderList();
+  })();
 })();
 
-})();
 
 
 
