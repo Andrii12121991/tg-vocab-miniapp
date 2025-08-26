@@ -50,18 +50,12 @@
 
   const reviewListEl = document.getElementById('review-list');
   const shuffleBtn = document.getElementById('shuffle');
-  const reviewToggleBtn = document.getElementById('review-toggle'); // кнопка «Режим: …»
 
   // State
   const STORAGE_KEY = 'tg_vocab_entries_v1';
   const KNOWN_KEY = 'tg_vocab_known_v1';
   let entries = readJson(STORAGE_KEY, []);
   let knownSet = new Set(readJson(KNOWN_KEY, []));
-
-  // режим показа в «Проверке»:
-  // 'right'  — виден только перевод (справа). Клик по правому — подсвечивает/показывает левую часть (иностранное).
-  // 'left'   — видны только иностранные слова (слева). Клик по левому — показывает перевод справа.
-  let reviewMode = 'right'; // по умолчанию как было раньше — «Перевод»
 
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
   function saveKnown(){ localStorage.setItem(KNOWN_KEY, JSON.stringify(Array.from(knownSet))); }
@@ -89,64 +83,25 @@
   }
 
   // -------- Review mode --------
-  function updateReviewToggleLabel() {
-    // просто меняем текст, без стилей
-    reviewToggleBtn.textContent = reviewMode === 'right' ? 'Режим: Перевод' : 'Режим: Значение';
-    reviewToggleBtn.setAttribute('aria-pressed', reviewMode === 'left' ? 'true' : 'false');
-  }
-
   function renderReview(order = entries){
     reviewListEl.innerHTML = '';
     order.forEach(e => {
       const li = document.createElement('li');
       li.className = 'review-row';
       li.dataset.id = e.id;
-
-      // создаём 2 ячейки
-      const left = document.createElement('span');   // левая колонка (иностранное)
-      left.className = 'foreign';
-      const right = document.createElement('span');  // правая колонка (перевод)
-      right.className = 'native';
-
-      if (reviewMode === 'right') {
-        // показываем только ПРАВУЮ колонку (переводы)
-        left.textContent  = '\u00A0';               // пусто (не ломаем высоту строки)
-        right.textContent = e.n;
-
-        // клик по правой стороне — показать/скрыть левую (иностранное)
-        right.addEventListener('click', () => {
-          if (left.textContent.trim()) {
-            left.textContent = '\u00A0';
-          } else {
-            left.textContent = e.f;
-          }
-        });
-      } else {
-        // reviewMode === 'left'
-        // показываем только ЛЕВУЮ колонку (иностранные слова)
-        left.textContent  = e.f;
-        right.textContent = '\u00A0';
-
-        // клик по левой стороне — показать/скрыть правую (перевод)
-        left.addEventListener('click', () => {
-          if (right.textContent.trim()) {
-            right.textContent = '\u00A0';
-          } else {
-            right.textContent = e.n;
-          }
-        });
-      }
-
-      // двойной клик по левой колонке — помечаем/снимаем «знаю» (как было)
-      left.addEventListener('dblclick', () => {
+      li.innerHTML = `
+        <span class="foreign">${escapeHtml(e.f)}</span>
+        <span class="native">${escapeHtml(e.n)}</span>
+      `;
+      li.querySelector('.native').addEventListener('click', () => {
+        li.classList.toggle('revealed');
+      });
+      li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
       });
-
-      li.append(left, right);
       reviewListEl.appendChild(li);
     });
-    updateReviewToggleLabel();
   }
 
   function shuffle(arr){
@@ -181,19 +136,6 @@
   modeAddBtn.addEventListener('click', () => setMode('add'));
   modeReviewBtn.addEventListener('click', () => setMode('review'));
 
-  // Переключатель «Режим: Значение/Перевод»
-  if (reviewToggleBtn) {
-    reviewToggleBtn.addEventListener('click', () => {
-      reviewMode = (reviewMode === 'right') ? 'left' : 'right';
-      renderReview();
-    });
-  }
-
-  // Перемешать
-  shuffleBtn.addEventListener('click', () => {
-    renderReview(shuffle(entries));
-  });
-
   addForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     let f = foreignInput.value.trim();
@@ -206,6 +148,7 @@
     const isDup = entries.some(x => x.f.trim().toLowerCase() === fKey && x.n.trim().toLowerCase() === nKey);
     if (isDup) { alert('Такая пара уже есть в списке.'); return; }
 
+    // Пытаемся сохранить в облако; при ошибке — локально
     try {
       if (canUseCloud()){
         const created = await apiAdd(f, n);
@@ -230,6 +173,7 @@
     if (!btn) return;
     const id = btn.dataset.id;
 
+    // Сначала пробуем удалить в облаке (если есть id от сервера)
     try { if (canUseCloud()) await apiDel(id); } catch(err){ console.warn('Cloud delete failed', err); }
 
     entries = entries.filter(x => x.id !== id);
@@ -241,25 +185,30 @@
 
   searchEl.addEventListener('input', renderList);
 
+  document.getElementById('shuffle').addEventListener('click', () => {
+    renderReview(shuffle(entries));
+  });
+
   function escapeHtml(s){
     return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
 
-  // -------- Initial load --------
-  (async () => {
-    try {
-      if (canUseCloud()){
-        const remote = await apiGet();
-        if (Array.isArray(remote)) {
-          entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
-          save();
-        }
+// -------- Initial load --------
+(async () => {
+  try {
+    if (canUseCloud()){
+      const remote = await apiGet();
+      if (Array.isArray(remote)) {
+        entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
+        save();
       }
-    } catch (e) {
-      console.warn('Cloud load failed, keep local cache.', e);
     }
-    renderList();
-  })();
+  } catch (e) {
+    console.warn('Cloud load failed, keep local cache.', e);
+  }
+  renderList();
+})();
+
 })();
 
 
