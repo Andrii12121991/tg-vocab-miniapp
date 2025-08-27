@@ -45,7 +45,18 @@
     <!-- Review mode -->
     <section id="review-section" class="card hidden">
       <div class="row">
-        <button id="shuffle">Перемешать</button>
+  <button id="shuffle">Перемешать</button>
+
+  <!-- ТУМБЛЕР РЕЖИМА ПРОВЕРКИ (справа = Перевод / слева = Значение) -->
+  <div id="review-toggle"
+       class="switch is-right"
+       role="switch"
+       aria-label="Режим проверки"
+       aria-checked="true"
+       title="Переключить режим">
+    <div class="knob"></div>
+  </div>
+</div>
       </div>
       <ul id="review-list" class="list"></ul>
     </section>
