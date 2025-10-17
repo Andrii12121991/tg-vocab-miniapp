@@ -8,7 +8,7 @@
   --border:#2b2d31;
 }
 
-/* Р‘Р°Р·Р° */
+/* База */
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -16,14 +16,14 @@ body{
   color:var(--text);
   font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial
 }
-/* С€РёСЂРµ РєРѕРЅС‚РµР№РЅРµСЂ Рё РјРµРЅСЊС€Рµ Р±РѕРєРѕРІС‹Рµ РѕС‚СЃС‚СѓРїС‹ */
+/* шире контейнер и меньше боковые отступы */
 #app{
-  max-width: 960px;     /* Р±С‹Р»Рѕ 860px */
+  max-width: 960px;     /* было 860px */
   margin: 0 auto;
-  padding: 16px;        /* Р±С‹Р»Рѕ 24px */
+  padding: 16px;        /* было 24px */
 }
 
-/* РҐРµРґРµСЂ Рё РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ */
+/* Хедер и переключатель */
 header{
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
   gap:12px;margin-bottom:16px
@@ -36,16 +36,16 @@ h1{font-size:22px;margin:0}
 }
 .mode-switch button.active{border-color:var(--accent)}
 
-/* РљР°СЂС‚РѕС‡РєРё */
+/* Карточки */
 .card{
   background:var(--card);border:1px solid var(--border);
   border-radius:16px;
-  padding: 12px;        /* Р±С‹Р»Рѕ 16px */
+  padding: 12px;        /* было 16px */
 }
 .hidden{display:none}
-.row{display:flex;gap:12px;flex-wrap:wrap}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 
-/* Р¤РѕСЂРјС‹ */
+/* Формы */
 label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
 input[type="text"]{
   padding:12px 14px;
@@ -64,18 +64,18 @@ button{
   padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
 }
 
-/* РћР±С‰РёРµ РїСЂР°РІРёР»Р° РґР»СЏ СЃРїРёСЃРєРѕРІ */
+/* Общие правила для списков */
 .list{
   list-style:none;
   padding:0;
   margin:12px 0 0 0
 }
 
-/* Р РµР¶РёРј Р”РѕР±Р°РІР»РµРЅРёРµ вЂ” С€РёСЂРµ РєРѕР»РѕРЅРєРё Рё РјРµРЅСЊС€Рµ Р·Р°Р·РѕСЂС‹ */
+/* Режим Добавление — шире колонки и меньше зазоры */
 .item{
   display:grid;
-  grid-template-columns: 1.2fr 1.2fr auto; /* Р±С‹Р»Рѕ 1fr 1fr auto */
-  gap:4px;                                  /* Р±С‹Р»Рѕ 6px */
+  grid-template-columns: 1.2fr 1.2fr auto; /* было 1fr 1fr auto */
+  gap:4px;                                  /* было 6px */
   align-items:center;
   border-bottom:1px dashed var(--border);
   padding:6px 0;
@@ -84,11 +84,11 @@ button{
   padding:4px 6px;border-radius:6px;
   font-size:18px;
 }
-/* Р›РµРІРѕРµ СЃР»РѕРІРѕ Р¶РёСЂРЅС‹Рј, РїСЂР°РІРѕРµ РѕР±С‹С‡РЅС‹Рј */
+/* Левое слово жирным, правое обычным */
 .item span:first-child{ font-weight:700; }
-.item span:nth-child(2){ font-weight:400; }
+item span:nth-child(2){ font-weight:400; }
 
-/* РљСЂРµСЃС‚РёРє СѓРґР°Р»РµРЅРёСЏ вЂ” РєРѕРјРїР°РєС‚РЅС‹Р№ Рё РЅРµР№С‚СЂР°Р»СЊРЅС‹Р№ */
+/* Крестик удаления — компактный и нейтральный */
 .item .del{
   background:transparent !important;
   color:var(--muted);
@@ -100,15 +100,15 @@ button{
 }
 .item .del:hover{color:var(--danger)}
 
-/* Р РµР¶РёРј РџСЂРѕРІРµСЂРєР° вЂ” С‚РѕР¶Рµ С€РёСЂРµ РєРѕР»РѕРЅРєРё */
+/* Режим Проверка — тоже шире колонки */
 .review-row{
   display:grid;
-  grid-template-columns: 1.2fr 1.2fr; /* Р±С‹Р»Рѕ 1fr 1fr */
+  grid-template-columns: 1.2fr 1.2fr; /* было 1fr 1fr */
   gap:8px;
   align-items:center;
   padding:10px 0;border-bottom:1px dashed var(--border)
 }
-/* Р»РµРІС‹Р№ СЃС‚РѕР»Р±РµС† (foreign) вЂ” СЃРєСЂС‹С‚ РґРѕ РєР»РёРєР°, Р¶РёСЂРЅС‹Р№ */
+/* левый столбец (foreign) — скрыт до клика, жирный */
 .review-row .foreign{
   justify-self:start;
   opacity:0.0;
@@ -117,7 +117,7 @@ button{
   font-weight:700;
 }
 .review-row.revealed .foreign{opacity:1}
-/* РїСЂР°РІС‹Р№ СЃС‚РѕР»Р±РµС† (native) вЂ” РѕР±С‹С‡РЅС‹Р№, РїРѕ Р»РµРІРѕРјСѓ РєСЂР°СЋ */
+/* правый столбец (native) — обычный, по левому краю */
 .review-row .native{
   font-weight:400;
   text-align:left;
@@ -125,17 +125,40 @@ button{
   font-size:18px;
 }
 
-/* РџРѕРёСЃРє */
+/* Поиск */
 .list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
 
-/* Р¤СѓС‚РµСЂ */
+/* Футер */
 footer{margin-top:16px;color:var(--muted)}
 
-/* РќРµР±РѕР»СЊС€РѕР№ С‚СЋРЅРёРЅРі РґР»СЏ РѕС‡РµРЅСЊ СѓР·РєРёС… СЌРєСЂР°РЅРѕРІ (СЃС‚Р°СЂС‹Рµ iPhone SE Рё С‚.Рї.) */
+/* ------- ДОПОЛНЕНИЯ: тумблер и инверсия режима ------- */
+
+/* маленький тумблер рядом с "Перемешать" */
+.rev-toggle{
+  width:52px;height:28px;border-radius:999px;
+  background:#2a63ff22; border:1px solid var(--border);
+  position:relative; cursor:pointer; flex:0 0 auto;
+}
+.rev-toggle::after{
+  content:""; position:absolute; top:2px; left:2px;
+  width:24px;height:24px;border-radius:50%;
+  background:#1a3a7a; transform:translateX(24px); /* по умолчанию вправо (Перевод) */
+  transition:transform .18s ease;
+}
+/* когда тумблер влево — режим Значение */
+.rev-toggle.left::after{ transform:translateX(0); }
+
+/* инверсия видимости для режима Значение */
+.mode-meaning .review-row .foreign{opacity:1}             /* слева видно сразу */
+.mode-meaning .review-row .native{opacity:0}              /* справа скрыто */
+.mode-meaning .review-row.revealed .native{opacity:1}     /* показ перевода по клику */
+
+/* Небольшой тюнинг для очень узких экранов */
 @media (max-width: 360px){
   #app{ padding:12px; }
   .card{ padding:10px; }
   .item{ grid-template-columns: 1.1fr 1.1fr auto; }
   .review-row{ grid-template-columns: 1.1fr 1.1fr; }
 }
+
 
