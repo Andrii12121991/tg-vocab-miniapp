@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Личный словарь</title>
+  <title>Personal Dictionary</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app">
     <header>
-      <h1>Личный словарь</h1>
+      <h1>Personal Dictionary</h1>
       <div class="mode-switch">
-        <button id="mode-add" class="active">Добавление</button>
-        <button id="mode-review">Проверка</button>
+        <button id="mode-add" class="active">Add Words</button>
+        <button id="mode-review">Review</button>
       </div>
     </header>
 
@@ -22,21 +22,21 @@
       <form id="add-form">
         <div class="row">
           <label>
-            Иностранное слово
+            Foreign word
             <input id="foreign" type="text" placeholder="cat / run / beautiful" required />
           </label>
           <label>
-            Перевод
+            Translation
             <input id="native" type="text" placeholder="кот / бегать / красивый" required />
           </label>
         </div>
         <div class="row actions">
-          <button type="submit">Добавить</button>
+          <button type="submit">Add</button>
         </div>
       </form>
 
       <div class="list-tools">
-        <input id="search" type="text" placeholder="Поиск по словам..." />
+        <input id="search" type="text" placeholder="Search..." />
       </div>
 
       <ul id="list" class="list"></ul>
@@ -45,18 +45,17 @@
     <!-- Review mode -->
     <section id="review-section" class="card hidden">
       <div class="row">
-        <button id="shuffle">Перемешать</button>
-        <!-- Тумблер режима: справа = Перевод (по умолчанию), слева = Значение -->
-        <div id="review-toggle" class="rev-toggle" aria-label="Переключить режим"></div>
+        <button id="shuffle">Shuffle</button>
+        <!-- Toggle: right = Translation (default), left = Meaning -->
+        <div id="review-toggle" class="rev-toggle" aria-label="Switch mode"></div>
       </div>
       <ul id="review-list" class="list"></ul>
     </section>
 
     <footer>
-      <small>Данные хранятся локально в вашем браузере.</small>
+      <small>Your data is stored locally in your browser.</small>
     </footer>
   </div>
   <script src="app.js"></script>
 </body>
 </html>
-
