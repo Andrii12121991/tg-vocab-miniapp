@@ -8,7 +8,7 @@
   --border:#2b2d31;
 }
 
-/* База */
+/* Base */
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -16,14 +16,12 @@ body{
   color:var(--text);
   font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial
 }
-/* шире контейнер и меньше боковые отступы */
 #app{
-  max-width: 960px;     /* было 860px */
+  max-width: 960px;
   margin: 0 auto;
-  padding: 16px;        /* было 24px */
+  padding: 16px;
 }
 
-/* Хедер и переключатель */
 header{
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
   gap:12px;margin-bottom:16px
@@ -36,16 +34,14 @@ h1{font-size:22px;margin:0}
 }
 .mode-switch button.active{border-color:var(--accent)}
 
-/* Карточки */
 .card{
   background:var(--card);border:1px solid var(--border);
   border-radius:16px;
-  padding: 12px;        /* было 16px */
+  padding: 12px;
 }
 .hidden{display:none}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 
-/* Формы */
 label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
 input[type="text"]{
   padding:12px 14px;
@@ -55,7 +51,6 @@ input[type="text"]{
   color:#000000;
   font-size:18px;
   line-height:1.4;
-  -webkit-appearance:none;appearance:none;
 }
 .small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .actions{margin-top:8px}
@@ -64,18 +59,16 @@ button{
   padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
 }
 
-/* Общие правила для списков */
 .list{
   list-style:none;
   padding:0;
   margin:12px 0 0 0
 }
 
-/* Режим Добавление — шире колонки и меньше зазоры */
 .item{
   display:grid;
-  grid-template-columns: 1.2fr 1.2fr auto; /* было 1fr 1fr auto */
-  gap:4px;                                  /* было 6px */
+  grid-template-columns: 1.2fr 1.2fr auto;
+  gap:4px;
   align-items:center;
   border-bottom:1px dashed var(--border);
   padding:6px 0;
@@ -84,31 +77,26 @@ button{
   padding:4px 6px;border-radius:6px;
   font-size:18px;
 }
-/* Левое слово жирным, правое обычным */
 .item span:first-child{ font-weight:700; }
-item span:nth-child(2){ font-weight:400; }
+.item span:nth-child(2){ font-weight:400; }
 
-/* Крестик удаления — компактный и нейтральный */
 .item .del{
   background:transparent !important;
   color:var(--muted);
   border:none;
   font-size:18px;line-height:1;
   cursor:pointer;padding:4px 6px;
-  -webkit-appearance:none;appearance:none;
   border-radius:6px;
 }
 .item .del:hover{color:var(--danger)}
 
-/* Режим Проверка — тоже шире колонки */
 .review-row{
   display:grid;
-  grid-template-columns: 1.2fr 1.2fr; /* было 1fr 1fr */
+  grid-template-columns: 1.2fr 1.2fr;
   gap:8px;
   align-items:center;
   padding:10px 0;border-bottom:1px dashed var(--border)
 }
-/* левый столбец (foreign) — скрыт до клика, жирный */
 .review-row .foreign{
   justify-self:start;
   opacity:0.0;
@@ -117,7 +105,6 @@ item span:nth-child(2){ font-weight:400; }
   font-weight:700;
 }
 .review-row.revealed .foreign{opacity:1}
-/* правый столбец (native) — обычный, по левому краю */
 .review-row .native{
   font-weight:400;
   text-align:left;
@@ -125,15 +112,11 @@ item span:nth-child(2){ font-weight:400; }
   font-size:18px;
 }
 
-/* Поиск */
 .list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
 
-/* Футер */
 footer{margin-top:16px;color:var(--muted)}
 
-/* ------- ДОПОЛНЕНИЯ: тумблер и инверсия режима ------- */
-
-/* маленький тумблер рядом с "Перемешать" */
+/* Toggle next to Shuffle */
 .rev-toggle{
   width:52px;height:28px;border-radius:999px;
   background:#2a63ff22; border:1px solid var(--border);
@@ -142,18 +125,15 @@ footer{margin-top:16px;color:var(--muted)}
 .rev-toggle::after{
   content:""; position:absolute; top:2px; left:2px;
   width:24px;height:24px;border-radius:50%;
-  background:#1a3a7a; transform:translateX(24px); /* по умолчанию вправо (Перевод) */
+  background:#1a3a7a; transform:translateX(24px);
   transition:transform .18s ease;
 }
-/* когда тумблер влево — режим Значение */
 .rev-toggle.left::after{ transform:translateX(0); }
 
-/* инверсия видимости для режима Значение */
-.mode-meaning .review-row .foreign{opacity:1}             /* слева видно сразу */
-.mode-meaning .review-row .native{opacity:0}              /* справа скрыто */
-.mode-meaning .review-row.revealed .native{opacity:1}     /* показ перевода по клику */
+.mode-meaning .review-row .foreign{opacity:1}
+.mode-meaning .review-row .native{opacity:0}
+.mode-meaning .review-row.revealed .native{opacity:1}
 
-/* Небольшой тюнинг для очень узких экранов */
 @media (max-width: 360px){
   #app{ padding:12px; }
   .card{ padding:10px; }
