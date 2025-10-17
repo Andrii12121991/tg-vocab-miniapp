@@ -51,11 +51,19 @@
   const reviewListEl = document.getElementById('review-list');
   const shuffleBtn = document.getElementById('shuffle');
 
+  // --- новый элемент тумблера
+  const reviewToggleEl = document.getElementById('review-toggle');
+
   // State
   const STORAGE_KEY = 'tg_vocab_entries_v1';
   const KNOWN_KEY = 'tg_vocab_known_v1';
   let entries = readJson(STORAGE_KEY, []);
   let knownSet = new Set(readJson(KNOWN_KEY, []));
+
+  // состояние режима проверки:
+  // 'translation' (по умолчанию) — как раньше: список = переводы (справа),
+  // 'meaning' — зеркально: список = иностранные слова (слева)
+  let reviewMode = 'translation';
 
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
   function saveKnown(){ localStorage.setItem(KNOWN_KEY, JSON.stringify(Array.from(knownSet))); }
@@ -93,13 +101,24 @@
         <span class="foreign">${escapeHtml(e.f)}</span>
         <span class="native">${escapeHtml(e.n)}</span>
       `;
-      li.querySelector('.native').addEventListener('click', () => {
-        li.classList.toggle('revealed');
+
+      // клик по нужной стороне — в зависимости от режима
+      li.addEventListener('click', (ev) => {
+        const t = ev.target;
+        if (
+          (reviewMode === 'translation' && t.classList.contains('native')) ||
+          (reviewMode === 'meaning'     && t.classList.contains('foreign'))
+        ){
+          li.classList.toggle('revealed');
+        }
       });
+
+      // пометка «знаю» — двойной клик по foreign остаётся как было
       li.querySelector('.foreign').addEventListener('dblclick', () => {
         if (knownSet.has(e.id)) knownSet.delete(e.id); else knownSet.add(e.id);
         saveKnown();
       });
+
       reviewListEl.appendChild(li);
     });
   }
@@ -111,6 +130,19 @@
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+  }
+
+  // установка режима проверки и визуального состояния тумблера
+  function setReviewMode(mode){
+    reviewMode = mode;
+    if (mode === 'meaning'){
+      reviewSection.classList.add('mode-meaning');  // включает инверсию видимости в CSS
+      reviewToggleEl.classList.add('left');         // ручка тумблера уезжает влево
+    } else {
+      reviewSection.classList.remove('mode-meaning');
+      reviewToggleEl.classList.remove('left');
+    }
+    renderReview(); // перерисовать список под режим
   }
 
   function setMode(mode){
@@ -185,31 +217,38 @@
 
   searchEl.addEventListener('input', renderList);
 
-  document.getElementById('shuffle').addEventListener('click', () => {
+  shuffleBtn.addEventListener('click', () => {
     renderReview(shuffle(entries));
+  });
+
+  // клик по тумблеру
+  reviewToggleEl.addEventListener('click', () => {
+    setReviewMode(reviewMode === 'translation' ? 'meaning' : 'translation');
   });
 
   function escapeHtml(s){
     return s.replace(/[&<>"]+/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   }
 
-// -------- Initial load --------
-(async () => {
-  try {
-    if (canUseCloud()){
-      const remote = await apiGet();
-      if (Array.isArray(remote)) {
-        entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
-        save();
+  // -------- Initial load --------
+  (async () => {
+    try {
+      if (canUseCloud()){
+        const remote = await apiGet();
+        if (Array.isArray(remote)) {
+          // Переписываем локально тем, что на сервере
+          entries = remote.map(r => ({ id:r.id, f:r.f, n:r.n }));
+          save();
+        }
       }
+    } catch (e) {
+      console.warn('Cloud load failed, keep local cache.', e);
     }
-  } catch (e) {
-    console.warn('Cloud load failed, keep local cache.', e);
-  }
-  renderList();
+    renderList();
+    setReviewMode('translation'); // режим по умолчанию — как раньше
+  })();
 })();
 
-})();
 
 
 
