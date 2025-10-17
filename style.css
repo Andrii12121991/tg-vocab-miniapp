@@ -1,114 +1,141 @@
 :root{
-  --bg:#f2f3f5;
-  --card:#eceff3;
-  --text:#111;
-  --muted:#9aa4b2;
-  --accent:#1a73e8;
+  --bg: #0f0f10;
+  --card: #1a1b1e;
+  --text: #eaeaea;
+  --muted:#6c6c6c;
+  --accent:#5ae6a9;
+  --danger:#ff6b6b;
+  --border:#2b2d31;
 }
 
-/* базовая раскладка */
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text)}
-.container{max-width:760px;margin:0 auto;padding:16px}
-.card{background:var(--card);border-radius:12px;padding:16px;border:1px solid rgba(0,0,0,.06)}
+/* Р‘Р°Р·Р° */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial
+}
+/* С€РёСЂРµ РєРѕРЅС‚РµР№РЅРµСЂ Рё РјРµРЅСЊС€Рµ Р±РѕРєРѕРІС‹Рµ РѕС‚СЃС‚СѓРїС‹ */
+#app{
+  max-width: 960px;     /* Р±С‹Р»Рѕ 860px */
+  margin: 0 auto;
+  padding: 16px;        /* Р±С‹Р»Рѕ 24px */
+}
+
+/* РҐРµРґРµСЂ Рё РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ */
+header{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:16px
+}
+h1{font-size:22px;margin:0}
+.mode-switch{display:flex;gap:8px}
+.mode-switch button{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer
+}
+.mode-switch button.active{border-color:var(--accent)}
+
+/* РљР°СЂС‚РѕС‡РєРё */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;
+  padding: 12px;        /* Р±С‹Р»Рѕ 16px */
+}
 .hidden{display:none}
+.row{display:flex;gap:12px;flex-wrap:wrap}
 
-h1{margin:0 0 16px 0;font-size:34px;line-height:1.15;font-weight:800}
-
-/* вкладки */
-.tabs{display:flex;gap:12px;margin:12px 0 20px}
-.tabs button{border:1px solid rgba(0,0,0,.1);background:#fff;color:var(--text);border-radius:14px;padding:10px 18px;font-weight:700;font-size:18px}
-.tabs button.active{background:var(--accent);color:#fff;border-color:transparent}
-
-/* формы */
-label{display:block;margin:12px 0 6px 0;font-weight:700}
-input[type="text"]{width:100%;padding:14px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);background:#fff;font-size:18px}
-.actions{margin-top:12px}
-.actions button{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:12px 18px;font-weight:800;font-size:18px}
-.list-tools{margin-top:14px}
-
-/* --- СПИСКИ (общие) --- */
-.list{list-style:none;margin:0;padding:0}
-.dash{border-bottom:2px dotted rgba(0,0,0,.15)}
-
-/* ============================
-   ЭКРАН «ДОБАВЛЕНИЕ» (вернули как было)
-   Стили применяются ТОЛЬКО внутри #add-section
-   ============================ */
-#add-section .list .item{
-  display:grid;
-  grid-template-columns: 1fr 1fr auto; /* слово | перевод | X */
-  align-items:center;
-  gap:10px;
-  padding:14px 0;
-  border-bottom:2px dotted rgba(0,0,0,.15);
-}
-
-#add-section .list .item span{
-  font-size:20px;                /* крупнее */
-  line-height:1.25;
-  text-align:left;               /* и правый столбец тоже слева */
-}
-
-#add-section .list .item span:first-child{font-weight:800;} /* слева — жирным */
-#add-section .list .item span:nth-child(2){font-weight:500;} /* справа — обычный */
-
-#add-section .list .item .del{
-  display:inline-flex;
-  justify-content:center;
-  align-items:center;
-  width:36px;height:36px;
+/* Р¤РѕСЂРјС‹ */
+label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
+input[type="text"]{
+  padding:12px 14px;
   border-radius:10px;
-  border:1px solid rgba(0,0,0,.12);
-  background:#fff;
-  color:#222;
-  cursor:pointer;
+  border:1px solid var(--border);
+  background:#ffffff;
+  color:#000000;
+  font-size:18px;
+  line-height:1.4;
+  -webkit-appearance:none;appearance:none;
+}
+.small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.actions{margin-top:8px}
+button{
+  border:none;background:var(--accent);color:#0a0a0a;
+  padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
 }
 
-/* ============================
-   ЭКРАН «ПРОВЕРКА»
-   Все новые стили — строго под #review-section,
-   чтобы не трогать добавление
-   ============================ */
-#review-section .row{display:flex;gap:12px;margin-bottom:12px}
-#review-section #shuffle{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:12px 18px;font-weight:800;font-size:18px}
-
-/* тумблер */
-#review-section .toggle{
-  position:relative;width:76px;height:40px;border-radius:20px;
-  background:#d9e6ff;border:1px solid rgba(0,0,0,.08);
-}
-#review-section .toggle .knob{
-  position:absolute;top:4px;left:4px;width:32px;height:32px;border-radius:50%;
-  background:#0c2a66;transition:transform .2s ease;
-}
-#review-section .toggle[data-mode="foreign"] .knob{transform:translateX(36px);} /* справа — режим «Перевод» */
-
-/* список проверки */
-#review-section .review-list{list-style:none;margin:0;padding:0}
-#review-section .review-row{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:10px;align-items:center;
-  padding:14px 0;border-bottom:2px dotted rgba(0,0,0,.15);
+/* РћР±С‰РёРµ РїСЂР°РІРёР»Р° РґР»СЏ СЃРїРёСЃРєРѕРІ */
+.list{
+  list-style:none;
+  padding:0;
+  margin:12px 0 0 0
 }
 
-/* bold только слева */
-#review-section .review-row .foreign{font-weight:800}
-#review-section .review-row .native{font-weight:500}
-
-/* скрытие «второй» колонки (до клика) */
-#review-section .review-row .ghost{visibility:hidden}
-#review-section .review-row.revealed .ghost{visibility:visible}
-
-/* для режима «Значение»/«Перевод» подставляется класс из JS */
-#review-section .mode-foreign .review-row .native{visibility:hidden}
-#review-section .mode-foreign .review-row.revealed .native{visibility:visible}
-
-#review-section .mode-native .review-row .foreign{visibility:hidden}
-#review-section .mode-native .review-row.revealed .foreign{visibility:visible}
-
-/* маленькие экраны — чуть плотнее */
-@media (max-width:420px){
-  #add-section .list .item span{font-size:18px}
-  input[type="text"]{font-size:16px}
-  .tabs button{font-size:16px}
+/* Р РµР¶РёРј Р”РѕР±Р°РІР»РµРЅРёРµ вЂ” С€РёСЂРµ РєРѕР»РѕРЅРєРё Рё РјРµРЅСЊС€Рµ Р·Р°Р·РѕСЂС‹ */
+.item{
+  display:grid;
+  grid-template-columns: 1.2fr 1.2fr auto; /* Р±С‹Р»Рѕ 1fr 1fr auto */
+  gap:4px;                                  /* Р±С‹Р»Рѕ 6px */
+  align-items:center;
+  border-bottom:1px dashed var(--border);
+  padding:6px 0;
 }
+.item span{
+  padding:4px 6px;border-radius:6px;
+  font-size:18px;
+}
+/* Р›РµРІРѕРµ СЃР»РѕРІРѕ Р¶РёСЂРЅС‹Рј, РїСЂР°РІРѕРµ РѕР±С‹С‡РЅС‹Рј */
+.item span:first-child{ font-weight:700; }
+.item span:nth-child(2){ font-weight:400; }
+
+/* РљСЂРµСЃС‚РёРє СѓРґР°Р»РµРЅРёСЏ вЂ” РєРѕРјРїР°РєС‚РЅС‹Р№ Рё РЅРµР№С‚СЂР°Р»СЊРЅС‹Р№ */
+.item .del{
+  background:transparent !important;
+  color:var(--muted);
+  border:none;
+  font-size:18px;line-height:1;
+  cursor:pointer;padding:4px 6px;
+  -webkit-appearance:none;appearance:none;
+  border-radius:6px;
+}
+.item .del:hover{color:var(--danger)}
+
+/* Р РµР¶РёРј РџСЂРѕРІРµСЂРєР° вЂ” С‚РѕР¶Рµ С€РёСЂРµ РєРѕР»РѕРЅРєРё */
+.review-row{
+  display:grid;
+  grid-template-columns: 1.2fr 1.2fr; /* Р±С‹Р»Рѕ 1fr 1fr */
+  gap:8px;
+  align-items:center;
+  padding:10px 0;border-bottom:1px dashed var(--border)
+}
+/* Р»РµРІС‹Р№ СЃС‚РѕР»Р±РµС† (foreign) вЂ” СЃРєСЂС‹С‚ РґРѕ РєР»РёРєР°, Р¶РёСЂРЅС‹Р№ */
+.review-row .foreign{
+  justify-self:start;
+  opacity:0.0;
+  border-bottom:none;
+  font-size:18px;
+  font-weight:700;
+}
+.review-row.revealed .foreign{opacity:1}
+/* РїСЂР°РІС‹Р№ СЃС‚РѕР»Р±РµС† (native) вЂ” РѕР±С‹С‡РЅС‹Р№, РїРѕ Р»РµРІРѕРјСѓ РєСЂР°СЋ */
+.review-row .native{
+  font-weight:400;
+  text-align:left;
+  justify-self:start;
+  font-size:18px;
+}
+
+/* РџРѕРёСЃРє */
+.list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
+
+/* Р¤СѓС‚РµСЂ */
+footer{margin-top:16px;color:var(--muted)}
+
+/* РќРµР±РѕР»СЊС€РѕР№ С‚СЋРЅРёРЅРі РґР»СЏ РѕС‡РµРЅСЊ СѓР·РєРёС… СЌРєСЂР°РЅРѕРІ (СЃС‚Р°СЂС‹Рµ iPhone SE Рё С‚.Рї.) */
+@media (max-width: 360px){
+  #app{ padding:12px; }
+  .card{ padding:10px; }
+  .item{ grid-template-columns: 1.1fr 1.1fr auto; }
+  .review-row{ grid-template-columns: 1.1fr 1.1fr; }
+}
+
