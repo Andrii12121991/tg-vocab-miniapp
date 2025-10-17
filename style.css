@@ -1,141 +1,119 @@
-:root{
-  --bg: #0f0f10;
-  --card: #1a1b1e;
-  --text: #eaeaea;
-  --muted:#6c6c6c;
-  --accent:#5ae6a9;
-  --danger:#ff6b6b;
-  --border:#2b2d31;
+:root {
+  --bg: #f4f5f7;
+  --card: #fff;
+  --text: #222;
+  --accent: #1d7eff;
 }
 
-/* База */
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial
-}
-/* шире контейнер и меньше боковые отступы */
-#app{
-  max-width: 960px;     /* было 860px */
-  margin: 0 auto;
-  padding: 16px;        /* было 24px */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 1rem;
 }
 
-/* Хедер и переключатель */
-header{
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
-  gap:12px;margin-bottom:16px
-}
-h1{font-size:22px;margin:0}
-.mode-switch{display:flex;gap:8px}
-.mode-switch button{
-  background:transparent;color:var(--text);
-  border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer
-}
-.mode-switch button.active{border-color:var(--accent)}
-
-/* Карточки */
-.card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:16px;
-  padding: 12px;        /* было 16px */
-}
-.hidden{display:none}
-.row{display:flex;gap:12px;flex-wrap:wrap}
-
-/* Формы */
-label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
-input[type="text"]{
-  padding:12px 14px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#ffffff;
-  color:#000000;
-  font-size:18px;
-  line-height:1.4;
-  -webkit-appearance:none;appearance:none;
-}
-.small{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.actions{margin-top:8px}
-button{
-  border:none;background:var(--accent);color:#0a0a0a;
-  padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
+.container {
+  max-width: 480px;
+  margin: auto;
 }
 
-/* Общие правила для списков */
-.list{
-  list-style:none;
-  padding:0;
-  margin:12px 0 0 0
+h1 {
+  margin: 0 0 1rem;
 }
 
-/* Режим Добавление — шире колонки и меньше зазоры */
-.item{
-  display:grid;
-  grid-template-columns: 1.2fr 1.2fr auto; /* было 1fr 1fr auto */
-  gap:4px;                                  /* было 6px */
-  align-items:center;
-  border-bottom:1px dashed var(--border);
-  padding:6px 0;
-}
-.item span{
-  padding:4px 6px;border-radius:6px;
-  font-size:18px;
-}
-/* Левое слово жирным, правое обычным */
-.item span:first-child{ font-weight:700; }
-.item span:nth-child(2){ font-weight:400; }
-
-/* Крестик удаления — компактный и нейтральный */
-.item .del{
-  background:transparent !important;
-  color:var(--muted);
-  border:none;
-  font-size:18px;line-height:1;
-  cursor:pointer;padding:4px 6px;
-  -webkit-appearance:none;appearance:none;
-  border-radius:6px;
-}
-.item .del:hover{color:var(--danger)}
-
-/* Режим Проверка — тоже шире колонки */
-.review-row{
-  display:grid;
-  grid-template-columns: 1.2fr 1.2fr; /* было 1fr 1fr */
-  gap:8px;
-  align-items:center;
-  padding:10px 0;border-bottom:1px dashed var(--border)
-}
-/* левый столбец (foreign) — скрыт до клика, жирный */
-.review-row .foreign{
-  justify-self:start;
-  opacity:0.0;
-  border-bottom:none;
-  font-size:18px;
-  font-weight:700;
-}
-.review-row.revealed .foreign{opacity:1}
-/* правый столбец (native) — обычный, по левому краю */
-.review-row .native{
-  font-weight:400;
-  text-align:left;
-  justify-self:start;
-  font-size:18px;
+button {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
-/* Поиск */
-.list-tools{display:flex;gap:8px;align-items:center;margin-top:8px}
-
-/* Футер */
-footer{margin-top:16px;color:var(--muted)}
-
-/* Небольшой тюнинг для очень узких экранов (старые iPhone SE и т.п.) */
-@media (max-width: 360px){
-  #app{ padding:12px; }
-  .card{ padding:10px; }
-  .item{ grid-template-columns: 1.1fr 1.1fr auto; }
-  .review-row{ grid-template-columns: 1.1fr 1.1fr; }
+button.active {
+  background: #0053d6;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0 4px rgba(0,0,0,0.05);
+}
+
+.hidden {
+  display: none;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list li {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #aaa;
+  padding: 0.5rem 0;
+}
+
+/* === 🔘 Тумблер режима проверки === */
+.rev-toggle {
+  position: relative;
+  display: inline-block;
+  width: 64px;
+  height: 36px;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+.rev-toggle input { display: none; }
+
+.rev-toggle .rev-knob {
+  position: absolute;
+  inset: 0;
+  background: var(--accent, #2f80ed);
+  border-radius: 999px;
+  transition: .2s ease;
+}
+.rev-toggle .rev-knob::before {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: 3px;
+  left: 31px;              /* по умолчанию справа (Перевод) */
+  border-radius: 50%;
+  background: #0f2654;
+  transition: .2s ease;
+}
+/* положение слева (режим Значение) */
+.rev-toggle input:not(:checked) + .rev-knob::before {
+  left: 3px;
+}
