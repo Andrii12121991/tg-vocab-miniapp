@@ -11,11 +11,6 @@
   if (tg) {
     tg.expand();
     tg.ready();
-    const theme = tg.themeParams || {};
-    if (theme.bg_color) document.documentElement.style.setProperty('--bg', theme.bg_color);
-    if (theme.text_color) document.documentElement.style.setProperty('--text', theme.text_color);
-    if (theme.secondary_bg_color) document.documentElement.style.setProperty('--card', theme.secondary_bg_color);
-    if (theme.button_color) document.documentElement.style.setProperty('--accent', theme.button_color);
     tg.BackButton.onClick(() => setMode('add'));
   }
 
@@ -248,7 +243,6 @@
     setReviewMode('translation');
   })();
 })();
-
 
 
 
