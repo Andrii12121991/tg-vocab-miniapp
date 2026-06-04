@@ -33,6 +33,11 @@ h1{font-size:22px;margin:0}
   border:1px solid var(--border);padding:8px 12px;border-radius:10px;cursor:pointer
 }
 .mode-switch button.active{border-color:var(--accent)}
+.mode-switch .home-screen-btn{
+  background:var(--accent);
+  color:#0a0a0a;
+  border-color:var(--accent);
+}
 
 .card{
   background:var(--card);border:1px solid var(--border);
@@ -139,6 +144,7 @@ footer{margin-top:16px;color:var(--muted)}
   .card{ padding:10px; }
   .item{ grid-template-columns: 1.1fr 1.1fr auto; }
   .review-row{ grid-template-columns: 1.1fr 1.1fr; }
+  .mode-switch{width:100%}
+  .mode-switch button{flex:1}
 }
-
 

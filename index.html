@@ -4,6 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Personal Dictionary</title>
+  <meta name="theme-color" content="#0f0f10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dictionary" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon-180.png" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -14,6 +21,7 @@
       <div class="mode-switch">
         <button id="mode-add" class="active">Add Words</button>
         <button id="mode-review">Review</button>
+        <button id="add-home-screen" class="home-screen-btn hidden" type="button">Home</button>
       </div>
     </header>
 

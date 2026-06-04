@@ -1,4 +1,12 @@
 (function(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
+
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg) {
     tg.expand();
@@ -37,6 +45,7 @@
 
   const modeAddBtn = document.getElementById('mode-add');
   const modeReviewBtn = document.getElementById('mode-review');
+  const addHomeScreenBtn = document.getElementById('add-home-screen');
   const addSection = document.getElementById('add-section');
   const reviewSection = document.getElementById('review-section');
   const addForm = document.getElementById('add-form');
@@ -53,6 +62,28 @@
   let entries = readJson(STORAGE_KEY, []);
   let knownSet = new Set(readJson(KNOWN_KEY, []));
   let reviewMode = 'translation';
+
+  function setupHomeScreenShortcut(){
+    if (!tg || typeof tg.addToHomeScreen !== 'function') return;
+
+    const showButton = () => addHomeScreenBtn.classList.remove('hidden');
+    const hideButton = () => addHomeScreenBtn.classList.add('hidden');
+
+    addHomeScreenBtn.addEventListener('click', () => {
+      tg.addToHomeScreen();
+    });
+
+    if (typeof tg.checkHomeScreenStatus === 'function') {
+      tg.checkHomeScreenStatus((status) => {
+        if (status === 'missed' || status === 'unknown') showButton();
+        else hideButton();
+      });
+    } else {
+      showButton();
+    }
+
+    tg.onEvent?.('homeScreenAdded', hideButton);
+  }
 
   function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
   function saveKnown(){ localStorage.setItem(KNOWN_KEY, JSON.stringify(Array.from(knownSet))); }
@@ -201,6 +232,7 @@
   }
 
   (async () => {
+    setupHomeScreenShortcut();
     try {
       if (canUseCloud()){
         const remote = await apiGet();
@@ -216,9 +248,6 @@
     setReviewMode('translation');
   })();
 })();
-
-
-
 
 
 
