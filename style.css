@@ -187,17 +187,18 @@ button:active{
   align-items:center;
   min-height:50px;
   border-bottom:1px solid var(--border);
-  padding:0;
+  padding:9px 0;
 }
 
 .item span{
   min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  white-space:normal;
   padding:0;
   border-radius:0;
   font-size:17px;
+  line-height:1.28;
 }
 
 .item span:first-child{
@@ -247,19 +248,20 @@ button:active{
   gap:10px;
   align-items:center;
   min-height:54px;
-  padding:0;
+  padding:10px 0;
   border-bottom:1px solid var(--border);
 }
 
 .review-row .foreign,
 .review-row .native{
   min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  white-space:normal;
   justify-self:start;
   text-align:left;
   font-size:18px;
+  line-height:1.28;
 }
 
 .review-row .foreign{
